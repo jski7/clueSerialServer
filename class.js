@@ -12,9 +12,9 @@ class stria {
         this.fade_dir = 1;
         this.live = 0;
         this.start = millis();
-        this.attack = random(1000,5000);
-        this.sustain = random(2000);
-        this.release = random(1000,5000);
+        this.attack = random(2000,10000);
+        this.sustain = random(4000);
+        this.release = random(2000,10000);
         this.duration = this.attack + this.sustain +this.release
         this.end = this.start + this.attack + this.sustain + this.release;
         this.kill = false;

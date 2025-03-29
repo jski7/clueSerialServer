@@ -70,67 +70,23 @@ function setup() {
   container.parent(select('main'));
   container.id('centered-content'); // Assign an ID for styling
   container.style('margin-top', `${windowHeight * 0.1}px`); // Add margin of 20% of window height
-
-
+  
+  
   // Create form elements within the container
   // createElement('h2', 'clue. configuration').parent(container);
 
-  let button = createButton("Select Device").parent(container);
-  button.class('button-36');
-  // button.position(10, 10);
-  createElement('br').parent(container);
-  createElement('br').parent(container);
-  button.mousePressed(connectToSerialPort);
-
-  // Boolean select (true/false)
-  createSpan('Palette ').parent(container);
-  let colorSetLabel = createSpan().parent(container);
-  colorSetLabel.html('<label class="switch"><input type="checkbox" id="colorSetToggle"><span class="slider"></span></label>');
-  colorSet = select('#colorSetToggle');
-  colorSet.changed(() => {
-    colorSet.value(colorSet.elt.checked);
-    sendSerialData();
-  });
-
-  createElement('br').parent(container);
-  createElement('br').parent(container);
-
-  createSpan('TestMode ').parent(container);
-  let testColorsLabel = createSpan().parent(container);
-  testColorsLabel.html('<label class="switch"><input type="checkbox" id="testColorsToggle"><span class="slider"></span></label>');
-  testColors = select('#testColorsToggle');
-  testColors.changed(() => {
-    testColors.value(testColors.elt.checked);
-    sendSerialData();
-  });
+  // Add ESP Web Install Button
+  let installbutton = 
+`<esp-web-install-button
+  manifest="https://firmware.esphome.io/esp-web-tools/manifest.json">
+  <button slot="activate">update</button>
+</esp-web-install-button>`
   
-  createElement('br').parent(container);
-  createElement('br').parent(container);
-
-  // Input for number of colors
-  createSpan('Colors  ').parent(container);
-  numColorsInput = createSelect().parent(container);
-  for (let i = 1; i <= 10; i++) {
-    numColorsInput.option(i);
-  }
-  numColorsInput.value('0'); // Set default value
-  createElement('br').parent(container);
-  numColorsInput.changed(updateRGBInputs); // Dynamically add inputs for RGB colors
-  createElement('br').parent(container);
+  let espWebInstallButton = createDiv().parent(container);
+  espWebInstallButton.html(installbutton);
 
   // Create a container for RGB inputs
   rgbInputContainer = createDiv().parent(container);
-  // Add a button to hide the div
-  let hideButton = createButton("Hide").parent(container);
-  hideButton.class('button-36');
-  hideButton.style('margin-top', '10px'); // Add some spacing
-  hideButton.mousePressed(() => {
-    container.style('display', 'none'); // Hide the container
-  });
-  // Submit button
-  // submitButton = createButton('Send').parent(container);
-  // submitButton.mousePressed(sendSerialData);
-  // submitButton.class('button-36');
 
 }
 
@@ -226,6 +182,7 @@ function draw() {
   generateGradient(colors, BLEND = true);
   Lamp(128,128);
   fill(255); // Set text color to white
+  // text("Console: " + data, 10, 50);
 }
 
 function Lamp(rows,cols) {
@@ -256,7 +213,7 @@ function Lamp(rows,cols) {
           // c = GRADIENT.get(.height/2)
           noStroke();
           fill(c);
-          rect(pos_x, pos_y, size_x+1, size_y+1);
+          rect(pos_x, pos_y, size_x + 1, size_y + 1);
         }
     }
   }
