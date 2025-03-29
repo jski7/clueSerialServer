@@ -59,7 +59,7 @@ function setup() {
   GRADIENT.pixelDensity(1);
   GRADIENT.noStroke();
   // GRADIENT.show();
-  frameRate(120);
+  frameRate(60);
 // CLUE
 
   // createCanvas(400, 400);
@@ -120,12 +120,18 @@ function setup() {
 
   // Create a container for RGB inputs
   rgbInputContainer = createDiv().parent(container);
-  // Add a button to hide the div
-  let hideButton = createButton("Hide").parent(container);
-  hideButton.class('button-36');
-  hideButton.style('margin-top', '10px'); // Add some spacing
-  hideButton.mousePressed(() => {
-    container.style('display', 'none'); // Hide the container
+
+  // Add a keyboard event listener to toggle the visibility of the div when 'h' is pressed
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'h') {
+      if (container.style('display') === 'none') {
+        container.style('display', 'block'); // Show the container
+        resizeCanvas(windowHeight * 0.3, windowHeight * 0.3);
+      } else {
+        container.style('display', 'none'); // Hide the container
+        resizeCanvas(windowHeight * 0.8, windowHeight * 0.8);
+      }
+    }
   });
   // Submit button
   // submitButton = createButton('Send').parent(container);
@@ -224,12 +230,13 @@ function sendSerialData() {
 function draw() {
   background(0);
   generateGradient(colors, BLEND = true);
-  Lamp(128,128);
+  Lamp(height/8,height/8);
   fill(255); // Set text color to white
+  // filter(BLUR, 10); // Apply a blur filter to the gradient
 }
 
 function Lamp(rows,cols) {
-  generateGradient(colors, BLEND = true);
+  generateGradient(colors, BLEND = false);
   background(0); 
   GRADIENT.loadPixels();
 
@@ -256,7 +263,7 @@ function Lamp(rows,cols) {
           // c = GRADIENT.get(.height/2)
           noStroke();
           fill(c);
-          rect(pos_x, pos_y, size_x+1, size_y+1);
+          rect(pos_x, pos_y, size_x, size_y);
         }
     }
   }
