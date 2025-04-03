@@ -38,5 +38,5 @@ function setup() {
 
 function draw() {
   // Render the lamp with higher resolution for the update page
-  renderLamp(128, 128, colors);
+  renderLamp(height/8, height/8, colors);
 } 
