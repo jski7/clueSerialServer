@@ -15,7 +15,7 @@ function setup() {
   // Add ESP Web Install Button with custom styling
   let installbutton = 
 `<esp-web-install-button
-  manifest="https://firmware.esphome.io/esp-web-tools/manifest.json">
+  manifest="./firmware/manifest.json">
   <button slot="activate" class="button-36">update</button>
 </esp-web-install-button>`;
   
@@ -26,6 +26,14 @@ function setup() {
 
   // Create a container for RGB inputs
   rgbInputContainer = createDiv().parent(container);
+
+  // Load firmware files
+  const firmwareFiles = [
+    { name: 'bootloader.bin', url: '/firmware/bootloader.bin' },
+    { name: 'partitions.bin', url: '/firmware/partitions.bin' },
+    { name: 'boot_app0.bin', url: '/firmware/boot_app0.bin' },
+    { name: 'firmware.bin', url: '/firmware/firmware.bin' }
+  ];
 }
 
 function draw() {
