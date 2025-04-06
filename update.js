@@ -2,7 +2,7 @@
 let colors = defaultColors.slice(); // Clone the default colors
 let rgbInputContainer;  // Container to hold the RGB input fields
 
-function setup() {
+async function setup() {
   // Initialize animation with a higher frame rate
   initAnimation(0.3, 120);
 
@@ -12,11 +12,16 @@ function setup() {
   container.id('centered-content'); // Assign an ID for styling
   container.style('margin-top', `${windowHeight * 0.1}px`); // Add margin of 20% of window height
   
-  // Add ESP Web Install Button with custom styling
+  // Fetch version from manifest.json
+  let manifestResponse = await fetch('./firmware/manifest.json');
+  let manifest = await manifestResponse.json();
+  let version = manifest.version;
+  
+  // Add ESP Web Install Button with custom styling and dynamic version
   let installbutton = 
 `<esp-web-install-button
   manifest="./firmware/manifest.json">
-  <button slot="activate" class="button-36">update</button>
+  <button slot="activate" class="button-36">update to v${version}</button>
 </esp-web-install-button>`;
   
   let espWebInstallButton = createDiv().parent(container);
