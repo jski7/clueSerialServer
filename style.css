@@ -13,8 +13,9 @@ body, html {
   #centered-content {
     text-align: center;
     width: 60%;
-    margin-left:15%;
-    margin-top: 50px;
+    min-width: 320px;
+    max-width: 400px;
+    margin: 50px auto 0 auto;
     border: 1px solid #ccc;
     padding: 20px;
     border-radius: 10px;
@@ -166,4 +167,58 @@ input[type=text] {
   box-shadow: rgba(255, 152, 0, 0.5) 0 1px 30px;
   background-image: linear-gradient(92.88deg, #FF9800 9.16%, #FFC107 43.89%, #FFEB3B 64.72%);
   transition-duration: .1s;
+}
+
+@media (max-width: 600px) {
+  #centered-content {
+    width: 95vw;
+    min-width: 0;
+    margin: 20px auto 0 auto;
+    padding: 10px;
+    font-size: 15px;
+  }
+  .button-36 {
+    width: 100%;
+    font-size: 15px;
+    padding: 0.5rem 0;
+  }
+  input[type="range"] {
+    width: 100px !important;
+  }
+}
+
+#defaultCanvas0 {
+  display: block;
+  margin: 0 auto;
+}
+
+@media (max-width: 600px) {
+  #defaultCanvas0 {
+    width: 95vw !important;
+    height: auto !important;
+    margin: 10px auto 0 auto;
+    display: block;
+  }
+}
+
+.button-connected {
+  background-image: linear-gradient(92.88deg, #11998e 9.16%, #38ef7d 64.72%);
+  border-radius: 8px;
+  border-style: none;
+  box-sizing: border-box;
+  color: #FFFFFF;
+  cursor: default;
+  flex-shrink: 0;
+  font-family: "Inter UI","SF Pro Display",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen,Ubuntu,Cantarell,"Open Sans","Helvetica Neue",sans-serif;
+  font-size: 16px;
+  font-weight: 500;
+  height: 2rem;
+  padding: 0 1.6rem;
+  text-align: center;
+  text-shadow: rgba(0, 0, 0, 0.25) 0 3px 8px;
+  transition: all .5s;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+  opacity: 0.92;
 }

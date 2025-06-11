@@ -77,10 +77,33 @@ function setup() {
 
   let button = createButton("Select Device").parent(container);
   button.class('button-36');
-  // button.position(10, 10);
   createElement('br').parent(container);
   createElement('br').parent(container);
   button.mousePressed(connectToSerialPort);
+
+  // Brightness input
+  let brightnessRow = createDiv().parent(container).style('display', 'flex').style('align-items', 'center').style('justify-content', 'center').style('margin-bottom', '10px');
+  createSpan('Brightness ').parent(brightnessRow);
+  let brightnessInput = createInput('128', 'number').parent(brightnessRow).style('width', '60px').attribute('min', '0').attribute('max', '255');
+  brightnessInput.input(function() {
+    let val = parseInt(brightnessInput.value());
+    if (isNaN(val) || val < 0) val = 0;
+    if (val > 255) val = 255;
+    brightnessInput.value(val);
+    sendSingleSerialCommand('b', val);
+  });
+
+  // Speed input
+  let speedRow = createDiv().parent(container).style('display', 'flex').style('align-items', 'center').style('justify-content', 'center').style('margin-bottom', '10px');
+  createSpan('Speed ').parent(speedRow);
+  let speedInput = createInput('128', 'number').parent(speedRow).style('width', '60px').attribute('min', '0').attribute('max', '255');
+  speedInput.input(function() {
+    let val = parseInt(speedInput.value());
+    if (isNaN(val) || val < 0) val = 0;
+    if (val > 255) val = 255;
+    speedInput.value(val);
+    sendSingleSerialCommand('s', val);
+  });
 
   // Boolean select (true/false)
   createSpan('Palette ').parent(container);
@@ -266,5 +289,20 @@ function Lamp(rows,cols) {
           rect(pos_x, pos_y, size_x, size_y);
         }
     }
+  }
+}
+
+function sendSingleSerialCommand(prefix, value) {
+  if (writer) {
+    const textToSend = `${prefix}${value}`;
+    const encoder = new TextEncoder();
+    const encodedData = encoder.encode(textToSend + "\n");
+    writer.write(encodedData).then(() => {
+      console.log(`Data sent: ${textToSend}`);
+    }).catch(err => {
+      console.error("Error sending data: ", err);
+    });
+  } else {
+    console.warn("No port connected!");
   }
 }

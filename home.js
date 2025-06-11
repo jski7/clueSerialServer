@@ -5,10 +5,29 @@ let submitButton;
 let rgbInputContainer;  // Container to hold the RGB input fields
 let colors = defaultColors.slice(); // clone the default colors
 let testModeContainer, colorsContainer; // Containers for sections that should be conditionally visible
+let serialAutoConnectInterval = null;
+let serialConnected = false;
+let serialBuffer = '';
+let isConfigLoading = false;
 
 function setup() {
   // Initialize animation with default settings
   initAnimation(0.3, 60);
+
+  // Auto-connect to serial if possible, and set up periodic check
+  if ('serial' in navigator) {
+    function tryAutoConnect() {
+      if (!serialConnected) {
+        navigator.serial.getPorts().then(ports => {
+          if (ports.length > 0) {
+            autoConnectToSerialPort(ports[0]);
+          }
+        });
+      }
+    }
+    tryAutoConnect(); // Initial check
+    serialAutoConnectInterval = setInterval(tryAutoConnect, 1000); // Check every 2 seconds
+  }
 
   // Create a div to hold everything and center it
   let container = createDiv();
@@ -19,9 +38,33 @@ function setup() {
   // Connect to device button
   let button = createButton("Select Device").parent(container);
   button.class('button-36');
+  button.id('connect-device-btn');
   createElement('br').parent(container);
   createElement('br').parent(container);
   button.mousePressed(connectToSerialPort);
+  window.connectDeviceButton = button; // Store reference globally for access in connectToSerialPort
+
+  // Brightness slider
+  let brightnessRow = createDiv().parent(container).style('display', 'flex').style('flex-direction', 'row').style('align-items', 'center').style('justify-content', 'center').style('margin-bottom', '10px');
+  let brightnessLabel = createSpan('Brightness').parent(brightnessRow).style('margin-right', '10px').style('min-width', '80px').style('text-align', 'right');
+  let brightnessSlider = createSlider(0, 255, 128, 1).parent(brightnessRow).style('width', '150px').style('accent-color', '#673FD7').style('margin', '0 10px');
+  let brightnessValue = createSpan('128').parent(brightnessRow).style('min-width', '32px').style('display', 'inline-block').style('text-align', 'left');
+  brightnessSlider.input(function() {
+    let val = brightnessSlider.value();
+    brightnessValue.html(val);
+    sendSingleSerialCommand('b', val);
+  });
+
+  // Speed slider
+  let speedRow = createDiv().parent(container).style('display', 'flex').style('flex-direction', 'row').style('align-items', 'center').style('justify-content', 'center').style('margin-bottom', '10px');
+  let speedLabel = createSpan('Speed').parent(speedRow).style('margin-right', '10px').style('min-width', '80px').style('text-align', 'right');
+  let speedSlider = createSlider(0, 255, 128, 1).parent(speedRow).style('width', '150px').style('accent-color', '#673FD7').style('margin', '0 10px');
+  let speedValue = createSpan('128').parent(speedRow).style('min-width', '32px').style('display', 'inline-block').style('text-align', 'left');
+  speedSlider.input(function() {
+    let val = speedSlider.value();
+    speedValue.html(val);
+    sendSingleSerialCommand('s', val);
+  });
 
   // Boolean select (true/false) for Palette
   createSpan('Palette ').parent(container);
@@ -93,6 +136,13 @@ function setup() {
       }
     }
   });
+
+  // Store references for UI elements in setup()
+  window.colorSet = colorSet;
+  window.testColors = testColors;
+  window.numColorsInput = numColorsInput;
+  window.rgbInputs = rgbInputs;
+  window.colorPickers = colorPickers;
 }
 
 // Function to update visibility based on the palette toggle
@@ -152,9 +202,13 @@ function updateRGBInputs() {
 }
 
 function sendSerialData() {
-  // Get the boolean value
-  let colorSetBool = colorSet.value();
-  let testModeBool = testColors.value();
+  if (isConfigLoading) {
+    console.warn('Config is loading, not sending new data yet.');
+    return;
+  }
+  // Use .elt.checked for checkboxes
+  let colorSetBool = colorSet && colorSet.elt ? colorSet.elt.checked : false;
+  let testModeBool = testColors && testColors.elt ? testColors.elt.checked : false;
 
   // Get the number of colors
   let numColors = int(numColorsInput.value());
@@ -201,4 +255,239 @@ function sendSerialData() {
 
 function draw() {
   renderLamp(height/8, height/8, colors);
+}
+
+function sendSingleSerialCommand(prefix, value) {
+  if (writer) {
+    const textToSend = `${prefix}${value}`;
+    const encoder = new TextEncoder();
+    const encodedData = encoder.encode(textToSend + "\n");
+    writer.write(encodedData).then(() => {
+      console.log(`Data sent: ${textToSend}`);
+    }).catch(err => {
+      console.error("Error sending data: ", err);
+    });
+  } else {
+    console.warn("No port connected!");
+  }
+}
+
+async function connectToSerialPort() {
+  try {
+    port = await navigator.serial.requestPort();
+    await port.open({ baudRate: 115200 });
+    writer = port.writable.getWriter();
+    reader = port.readable.getReader();
+    serialConnected = true;
+    if (serialAutoConnectInterval) {
+      clearInterval(serialAutoConnectInterval);
+      serialAutoConnectInterval = null;
+    }
+    console.log("Connected to port!");
+    // Update button to green and text to 'Connected'
+    if (window.connectDeviceButton) {
+      window.connectDeviceButton.html('Connected');
+      window.connectDeviceButton.removeClass('button-36');
+      window.connectDeviceButton.addClass('button-connected');
+      window.connectDeviceButton.attribute('disabled', '');
+    }
+    // Send 'read' command after connecting
+    if (writer) {
+      const encoder = new TextEncoder();
+      const encodedData = encoder.encode('read\n');
+      writer.write(encodedData).then(() => {
+        console.log('Sent: read');
+      }).catch(err => {
+        console.error('Error sending read command:', err);
+      });
+    }
+    // Start reading serial data
+    readSerialLoop();
+  } catch (error) {
+    console.error("Error connecting to serial port: ", error);
+    // On error, update UI to disconnected state
+    serialConnected = false;
+    if (window.connectDeviceButton) {
+      window.connectDeviceButton.html('Select Device');
+      window.connectDeviceButton.removeClass('button-connected');
+      window.connectDeviceButton.addClass('button-36');
+      window.connectDeviceButton.removeAttribute('disabled');
+    }
+    // Restart periodic auto-connect
+    if (!serialConnected && !serialAutoConnectInterval && 'serial' in navigator) {
+      function tryAutoConnect() {
+        if (!serialConnected) {
+          navigator.serial.getPorts().then(ports => {
+            if (ports.length > 0) {
+              autoConnectToSerialPort(ports[0]);
+            }
+          });
+        }
+      }
+      serialAutoConnectInterval = setInterval(tryAutoConnect, 1000);
+    }
+  }
+}
+
+async function autoConnectToSerialPort(port) {
+  try {
+    await port.open({ baudRate: 115200 });
+    writer = port.writable.getWriter();
+    reader = port.readable.getReader();
+    serialConnected = true;
+    if (serialAutoConnectInterval) {
+      clearInterval(serialAutoConnectInterval);
+      serialAutoConnectInterval = null;
+    }
+    if (window.connectDeviceButton) {
+      window.connectDeviceButton.html('Connected');
+      window.connectDeviceButton.removeClass('button-36');
+      window.connectDeviceButton.addClass('button-connected');
+      window.connectDeviceButton.attribute('disabled', '');
+    }
+    if (writer) {
+      const encoder = new TextEncoder();
+      const encodedData = encoder.encode('read\n');
+      writer.write(encodedData).then(() => {
+        console.log('Sent: read');
+      }).catch(err => {
+        console.error('Error sending read command:', err);
+      });
+    }
+    // Start reading serial data
+    readSerialLoop();
+    console.log('Auto-connected to serial port!');
+  } catch (err) {
+    console.error('Auto-connect failed:', err);
+  }
+}
+
+// Serial reading loop
+async function readSerialLoop() {
+  try {
+    while (serialConnected && reader) {
+      const { value, done } = await reader.read();
+      if (done) {
+        reader.releaseLock();
+        break;
+      }
+      if (value) {
+        const text = new TextDecoder().decode(value);
+        console.log('Serial received:', text); // DEBUG
+        serialBuffer += text;
+        // Check for config block
+        if (serialBuffer.includes('*** CURRENT CONFIG ***')) {
+          // Find the start of the config
+          const configStart = serialBuffer.indexOf('*** CURRENT CONFIG ***');
+          // Find the end: two consecutive newlines after RGB colors
+          // Accept both \n\n and \r\n\r\n
+          // Find the first blank line after RGB Colors:
+          const rgbIndex = serialBuffer.indexOf('RGB Colors:', configStart);
+          if (rgbIndex !== -1) {
+            // Look for two consecutive newlines after RGB Colors:
+            let configEnd = serialBuffer.indexOf('\n\n', rgbIndex);
+            if (configEnd === -1) configEnd = serialBuffer.indexOf('\r\n\r\n', rgbIndex);
+            if (configEnd !== -1) {
+              const configBlock = serialBuffer.substring(configStart, configEnd).trim();
+              parseAndApplyConfig(configBlock);
+              serialBuffer = serialBuffer.substring(configEnd + 2); // Remove parsed part
+            }
+          }
+        }
+      }
+    }
+  } catch (err) {
+    console.error('Error reading serial:', err);
+    // On error, update UI to disconnected state
+    serialConnected = false;
+    if (window.connectDeviceButton) {
+      window.connectDeviceButton.html('Select Device');
+      window.connectDeviceButton.removeClass('button-connected');
+      window.connectDeviceButton.addClass('button-36');
+      window.connectDeviceButton.removeAttribute('disabled');
+    }
+    // Restart periodic auto-connect
+    if (!serialConnected && !serialAutoConnectInterval && 'serial' in navigator) {
+      function tryAutoConnect() {
+        if (!serialConnected) {
+          navigator.serial.getPorts().then(ports => {
+            if (ports.length > 0) {
+              autoConnectToSerialPort(ports[0]);
+            }
+          });
+        }
+      }
+      serialAutoConnectInterval = setInterval(tryAutoConnect, 1000);
+    }
+  }
+}
+
+// Parse config and update UI
+function parseAndApplyConfig(configText) {
+  isConfigLoading = true;
+  console.log('Parsing config:', configText); // DEBUG
+  const lines = configText.split(/\r?\n/);
+  let palette = false, test = false, brightness = 128, speed = 128, numColors = 3, rgbColors = [];
+  let rgbSection = false;
+  for (let line of lines) {
+    if (line.startsWith('Palette:')) palette = line.split(':')[1].trim() === 'true';
+    else if (line.startsWith('Test:')) test = line.split(':')[1].trim() === 'true';
+    else if (line.startsWith('Brightness:')) brightness = parseInt(line.split(':')[1].trim());
+    else if (line.startsWith('Speed:')) speed = parseInt(line.split(':')[1].trim());
+    else if (line.startsWith('Number of Colors:')) numColors = parseInt(line.split(':')[1].trim());
+    else if (line.startsWith('RGB Colors:')) rgbSection = true;
+    else if (rgbSection && line.match(/^([0-9A-Fa-f]{1,6}|0)$/)) {
+      rgbColors.push(line.trim().padStart(6, '0').toUpperCase());
+    }
+  }
+  // Log parsed values as requested
+  console.log('PARSED_PALETTE_VALUE:', palette);
+  console.log('PARSED_TEST_VALUE:', test);
+  console.log('PARSED_NUM_COLORS:', numColors);
+  console.log('PARSED_COLORS:', rgbColors.join(','));
+  // Update UI
+  if (window.colorSet) {
+    window.colorSet.elt.checked = palette;
+    console.log('Set Palette:', palette); // DEBUG
+  }
+  if (window.testColors) {
+    window.testColors.elt.checked = test;
+    console.log('Set Test:', test); // DEBUG
+  }
+  // Update sliders
+  const sliders = document.querySelectorAll('input[type="range"]');
+  if (sliders.length >= 2) {
+    sliders[0].value = brightness;
+    sliders[0].dispatchEvent(new Event('input'));
+    console.log('Set Brightness:', brightness); // DEBUG
+    sliders[1].value = speed;
+    sliders[1].dispatchEvent(new Event('input'));
+    console.log('Set Speed:', speed); // DEBUG
+  }
+  // Update number of colors
+  if (window.numColorsInput) {
+    window.numColorsInput.value(numColors);
+    window.numColorsInput.elt.value = numColors;
+    window.numColorsInput.elt.dispatchEvent(new Event('change'));
+    console.log('Set Number of Colors:', numColors); // DEBUG
+  }
+  // Update RGB inputs
+  setTimeout(() => {
+    // Re-query the DOM for the latest rgbInputs and colorPickers
+    const rgbInputFields = document.querySelectorAll('input[type="text"]');
+    const colorPickerFields = document.querySelectorAll('input[type="color"]');
+    window.rgbInputs = Array.from(rgbInputFields).map(el => ({ value: v => el.value = v, elt: el }));
+    window.colorPickers = Array.from(colorPickerFields).map(el => ({ value: v => el.value = v, elt: el }));
+    if (window.rgbInputs && rgbColors.length > 0 && window.colorPickers) {
+      for (let i = 0; i < rgbColors.length && i < window.rgbInputs.length && i < window.colorPickers.length; i++) {
+        window.rgbInputs[i].value(rgbColors[i]);
+        window.rgbInputs[i].elt.value = rgbColors[i];
+        window.colorPickers[i].value('#' + rgbColors[i]);
+        window.colorPickers[i].elt.value = '#' + rgbColors[i];
+        console.log(`Set RGB[${i}]:`, rgbColors[i]); // DEBUG
+      }
+    }
+    updateVisibility(palette); // Ensure UI reflects palette state
+    isConfigLoading = false;
+  }, 100); // Wait for DOM update
 } 
