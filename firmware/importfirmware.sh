@@ -1,8 +1,8 @@
 #!/bin/bash
 
 # Define source and destination paths
-SRC="/Users/elektrojakub/Desktop/_PROJECTS/CLUE/_CODE/clue. - lamp code/.pio/build/clue_esp32s3"
-DEST="/Users/elektrojakub/Desktop/_PROJECTS/CLUE/_CODE/clueSerialServer/firmware"
+SRC="../../clue. - lamp code/.pio/build/clue_esp32s3"
+DEST="./"
 
 # Create destination directory if it doesn't exist
 mkdir -p "$DEST"
