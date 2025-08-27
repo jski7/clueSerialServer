@@ -75,8 +75,30 @@ function setup() {
   // Create form elements within the container
   // createElement('h2', 'clue. configuration').parent(container);
 
-  let button = createButton("Select Device").parent(container);
+  // Create a horizontal container for the buttons
+  let buttonContainer = createDiv().parent(container).style('display', 'flex').style('justify-content', 'center').style('gap', '10px').style('margin-bottom', '20px');
+  
+  let button = createButton("Select Device").parent(buttonContainer);
   button.class('button-36');
+  
+  // Save button
+  let saveButton = createButton('Save').parent(buttonContainer);
+  saveButton.class('button-36');
+  saveButton.mousePressed(() => {
+    if (writer) {
+      const textToSend = 'w';
+      const encoder = new TextEncoder();
+      const encodedData = encoder.encode(textToSend + "\n");
+      writer.write(encodedData).then(() => {
+        console.log("Save command sent: ", textToSend);
+      }).catch(err => {
+        console.error("Error sending save command: ", err);
+      });
+    } else {
+      console.warn("No port connected!");
+    }
+  });
+  
   createElement('br').parent(container);
   createElement('br').parent(container);
   button.mousePressed(connectToSerialPort);
@@ -160,6 +182,8 @@ function setup() {
   // submitButton = createButton('Send').parent(container);
   // submitButton.mousePressed(sendSerialData);
   // submitButton.class('button-36');
+
+
 
 }
 
@@ -294,7 +318,7 @@ function Lamp(rows,cols) {
 
 function sendSingleSerialCommand(prefix, value) {
   if (writer) {
-    const textToSend = `${prefix}${value}`;
+    const textToSend = value !== undefined ? `${prefix}${value}` : prefix;
     const encoder = new TextEncoder();
     const encodedData = encoder.encode(textToSend + "\n");
     writer.write(encodedData).then(() => {

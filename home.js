@@ -35,14 +35,22 @@ function setup() {
   container.id('centered-content');
   container.style('margin-top', `${windowHeight * 0.1}px`);
 
+  // Create a horizontal container for the buttons
+  let buttonContainer = createDiv().parent(container).style('display', 'flex').style('justify-content', 'center').style('gap', '10px').style('margin-bottom', '20px');
+  
   // Connect to device button
-  let button = createButton("Select Device").parent(container);
+  let button = createButton("Select Device").parent(buttonContainer);
   button.class('button-36');
   button.id('connect-device-btn');
-  createElement('br').parent(container);
-  createElement('br').parent(container);
   button.mousePressed(connectToSerialPort);
   window.connectDeviceButton = button; // Store reference globally for access in connectToSerialPort
+  
+  // Save button
+  let saveButton = createButton('Save').parent(buttonContainer);
+  saveButton.class('button-36');
+  saveButton.mousePressed(() => {
+    sendSingleSerialCommand('w');
+  });
 
   // Brightness slider
   let brightnessRow = createDiv().parent(container).style('display', 'flex').style('flex-direction', 'row').style('align-items', 'center').style('justify-content', 'center').style('margin-bottom', '10px');
@@ -184,9 +192,9 @@ function updateRGBInputs() {
     rgbInputs.push(rgbInput);
     colorPickers.push(colorPicker);
 
-    // Set up color picker event listener
-    colorPicker.input(function() {
-      // When the color is picked, update the corresponding text input field with the hex value
+    // Set up color picker event listener - only send on change (mouse release), not while dragging
+    colorPicker.changed(function() {
+      // When the color is picked and mouse is released, update the corresponding text input field with the hex value
       rgbInput.value(colorPicker.value().toUpperCase().substring(1)); // Remove '#' from hex string
       sendSerialData();
     });
@@ -259,7 +267,7 @@ function draw() {
 
 function sendSingleSerialCommand(prefix, value) {
   if (writer) {
-    const textToSend = `${prefix}${value}`;
+    const textToSend = value !== undefined ? `${prefix}${value}` : prefix;
     const encoder = new TextEncoder();
     const encodedData = encoder.encode(textToSend + "\n");
     writer.write(encodedData).then(() => {
@@ -284,25 +292,38 @@ async function connectToSerialPort() {
       serialAutoConnectInterval = null;
     }
     console.log("Connected to port!");
-    // Update button to green and text to 'Connected'
+    
+    // Show loading state
     if (window.connectDeviceButton) {
-      window.connectDeviceButton.html('Connected');
+      window.connectDeviceButton.html('<span class="loading-spinner"></span>Connecting...');
       window.connectDeviceButton.removeClass('button-36');
-      window.connectDeviceButton.addClass('button-connected');
+      window.connectDeviceButton.removeClass('button-connected');
+      window.connectDeviceButton.addClass('button-loading');
       window.connectDeviceButton.attribute('disabled', '');
     }
-    // Send 'read' command after connecting
-    if (writer) {
-      const encoder = new TextEncoder();
-      const encodedData = encoder.encode('read\n');
-      writer.write(encodedData).then(() => {
-        console.log('Sent: read');
-      }).catch(err => {
-        console.error('Error sending read command:', err);
-      });
-    }
-    // Start reading serial data
+    
+    // Start reading serial data immediately
     readSerialLoop();
+    
+    // Send 'read' command after 3 seconds
+    setTimeout(() => {
+      if (writer && serialConnected) {
+        const encoder = new TextEncoder();
+        const encodedData = encoder.encode('read\n');
+        writer.write(encodedData).then(() => {
+          console.log('Sent: read');
+        }).catch(err => {
+          console.error('Error sending read command:', err);
+        });
+      }
+      
+      // Update button to connected state
+      if (window.connectDeviceButton) {
+        window.connectDeviceButton.html('Connected');
+        window.connectDeviceButton.removeClass('button-loading');
+        window.connectDeviceButton.addClass('button-connected');
+      }
+    }, 3000);
   } catch (error) {
     console.error("Error connecting to serial port: ", error);
     // On error, update UI to disconnected state
@@ -339,23 +360,39 @@ async function autoConnectToSerialPort(port) {
       clearInterval(serialAutoConnectInterval);
       serialAutoConnectInterval = null;
     }
+    
+    // Show loading state
     if (window.connectDeviceButton) {
-      window.connectDeviceButton.html('Connected');
+      window.connectDeviceButton.html('<span class="loading-spinner"></span>Connecting...');
       window.connectDeviceButton.removeClass('button-36');
-      window.connectDeviceButton.addClass('button-connected');
+      window.connectDeviceButton.removeClass('button-connected');
+      window.connectDeviceButton.addClass('button-loading');
       window.connectDeviceButton.attribute('disabled', '');
     }
-    if (writer) {
-      const encoder = new TextEncoder();
-      const encodedData = encoder.encode('read\n');
-      writer.write(encodedData).then(() => {
-        console.log('Sent: read');
-      }).catch(err => {
-        console.error('Error sending read command:', err);
-      });
-    }
-    // Start reading serial data
+    
+    // Start reading serial data immediately
     readSerialLoop();
+    
+    // Send 'read' command after 3 seconds
+    setTimeout(() => {
+      if (writer && serialConnected) {
+        const encoder = new TextEncoder();
+        const encodedData = encoder.encode('read\n');
+        writer.write(encodedData).then(() => {
+          console.log('Sent: read');
+        }).catch(err => {
+          console.error('Error sending read command:', err);
+        });
+      }
+      
+      // Update button to connected state
+      if (window.connectDeviceButton) {
+        window.connectDeviceButton.html('Connected');
+        window.connectDeviceButton.removeClass('button-loading');
+        window.connectDeviceButton.addClass('button-connected');
+      }
+    }, 3000);
+    
     console.log('Auto-connected to serial port!');
   } catch (err) {
     console.error('Auto-connect failed:', err);
