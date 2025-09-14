@@ -9,6 +9,7 @@ let serialAutoConnectInterval = null;
 let serialConnected = false;
 let serialBuffer = '';
 let isConfigLoading = false;
+let isRP2350Driver = false; // Track if rp2350 driver is detected
 
 function setup() {
   // Initialize animation with default settings
@@ -35,7 +36,17 @@ function setup() {
   container.id('centered-content');
   container.style('margin-top', `${windowHeight * 0.1}px`);
 
-  // Create a horizontal container for the buttons
+  // Add logo at the top
+  let logoContainer = createDiv().parent(container).style('display', 'flex').style('justify-content', 'center').style('margin-top', '10px').style('margin-bottom', '10px');
+  let logo = createImg('logo.png').parent(logoContainer);
+  logo.style('max-width', '120px').style('height', 'auto');
+  
+  // Add config label below logo
+  let configContainer = createDiv().parent(container).style('display', 'flex').style('justify-content', 'center').style('margin-bottom', '20px');
+  let configLabel = createSpan('config').parent(configContainer);
+  configLabel.style('font-size', '12px').style('font-weight', 'normal').style('color', '#888888').style('letter-spacing', '0.5px').style('text-transform', 'uppercase');
+
+  // Create a horizontal container for the connect button only
   let buttonContainer = createDiv().parent(container).style('display', 'flex').style('justify-content', 'center').style('gap', '10px').style('margin-bottom', '20px');
   
   // Connect to device button
@@ -45,17 +56,20 @@ function setup() {
   button.mousePressed(connectToSerialPort);
   window.connectDeviceButton = button; // Store reference globally for access in connectToSerialPort
   
-  // Save button
-  let saveButton = createButton('Save').parent(buttonContainer);
-  saveButton.class('button-36');
-  saveButton.mousePressed(() => {
-    sendSingleSerialCommand('w');
-  });
+  // Add separator after connected button
+  let connectedSeparator = createDiv().parent(container);
+  connectedSeparator.class('section-divider');
+  connectedSeparator.id('connectedSeparator');
+
+  // Create container for main controls (brightness, speed, palette)
+  let mainControlsContainer = createDiv().parent(container);
+  mainControlsContainer.id('mainControlsContainer');
+  mainControlsContainer.style('display', 'none'); // Initially hidden until connected
 
   // Brightness slider
-  let brightnessRow = createDiv().parent(container).style('display', 'flex').style('flex-direction', 'row').style('align-items', 'center').style('justify-content', 'center').style('margin-bottom', '10px');
+  let brightnessRow = createDiv().parent(mainControlsContainer).style('display', 'flex').style('flex-direction', 'row').style('align-items', 'center').style('justify-content', 'center').style('margin-bottom', '10px');
   let brightnessLabel = createSpan('Brightness').parent(brightnessRow).style('margin-right', '10px').style('min-width', '80px').style('text-align', 'right');
-  let brightnessSlider = createSlider(0, 255, 128, 1).parent(brightnessRow).style('width', '150px').style('accent-color', '#673FD7').style('margin', '0 10px');
+  let brightnessSlider = createSlider(0, 255, 128, 1).parent(brightnessRow).style('width', '150px').style('accent-color', '#7600FF').style('margin', '0 10px');
   let brightnessValue = createSpan('128').parent(brightnessRow).style('min-width', '32px').style('display', 'inline-block').style('text-align', 'left');
   brightnessSlider.input(function() {
     let val = brightnessSlider.value();
@@ -64,19 +78,23 @@ function setup() {
   });
 
   // Speed slider
-  let speedRow = createDiv().parent(container).style('display', 'flex').style('flex-direction', 'row').style('align-items', 'center').style('justify-content', 'center').style('margin-bottom', '10px');
+  let speedRow = createDiv().parent(mainControlsContainer).style('display', 'flex').style('flex-direction', 'row').style('align-items', 'center').style('justify-content', 'center').style('margin-bottom', '10px');
   let speedLabel = createSpan('Speed').parent(speedRow).style('margin-right', '10px').style('min-width', '80px').style('text-align', 'right');
-  let speedSlider = createSlider(0, 255, 128, 1).parent(speedRow).style('width', '150px').style('accent-color', '#673FD7').style('margin', '0 10px');
+  let speedSlider = createSlider(0, 255, 128, 1).parent(speedRow).style('width', '150px').style('accent-color', '#7600FF').style('margin', '0 10px');
   let speedValue = createSpan('128').parent(speedRow).style('min-width', '32px').style('display', 'inline-block').style('text-align', 'left');
   speedSlider.input(function() {
     let val = speedSlider.value();
     speedValue.html(val);
     sendSingleSerialCommand('s', val);
   });
+  
+  // Add separator after speed slider
+  let speedSeparator = createDiv().parent(mainControlsContainer);
+  speedSeparator.class('section-divider');
 
   // Boolean select (true/false) for Palette
-  createSpan('Palette ').parent(container);
-  let colorSetLabel = createSpan().parent(container);
+  createSpan('Palette ').parent(mainControlsContainer);
+  let colorSetLabel = createSpan().parent(mainControlsContainer);
   colorSetLabel.html('<label class="switch"><input type="checkbox" id="colorSetToggle"><span class="slider"></span></label>');
   colorSet = select('#colorSetToggle');
   colorSet.changed(() => {
@@ -86,7 +104,6 @@ function setup() {
     sendSerialData();
   });
 
-  createElement('br').parent(container);
   createElement('br').parent(container);
 
   // Create containers for conditional sections
@@ -105,7 +122,10 @@ function setup() {
   });
   
   createElement('br').parent(testModeContainer);
-  createElement('br').parent(testModeContainer);
+  
+  // Add separator after test mode
+  let testModeSeparator = createDiv().parent(testModeContainer);
+  testModeSeparator.class('section-divider');
 
   // Colors section in its own container
   colorsContainer = createDiv().parent(container);
@@ -132,6 +152,18 @@ function setup() {
   // Set initial visibility based on palette toggle
   updateVisibility(colorSet.elt.checked);
 
+  // Create save button container at the bottom
+  let saveButtonContainer = createDiv().parent(container).style('display', 'flex').style('justify-content', 'center').style('margin-top', '5px');
+  
+  // Save button
+  let saveButton = createButton('Save').parent(saveButtonContainer);
+  saveButton.class('button-36');
+  saveButton.style('display', 'none'); // Initially hidden until rp2350 driver is detected
+  saveButton.mousePressed(() => {
+    sendSingleSerialCommand('w');
+  });
+  window.saveButton = saveButton; // Store reference globally for access
+
   // Add a keyboard event listener to toggle the visibility of the div when 'h' is pressed
   document.addEventListener('keydown', (event) => {
     if (event.key === 'h') {
@@ -151,6 +183,9 @@ function setup() {
   window.numColorsInput = numColorsInput;
   window.rgbInputs = rgbInputs;
   window.colorPickers = colorPickers;
+  
+  // Ensure save button starts hidden
+  updateSaveButtonVisibility();
 }
 
 // Function to update visibility based on the palette toggle
@@ -168,6 +203,19 @@ function updateVisibility(paletteOn) {
     // Palette is OFF, hide test mode and colors
     testModeContainer.style('display', 'none');
     colorsContainer.style('display', 'none');
+  }
+}
+
+// Function to update save button visibility based on rp2350 driver detection
+function updateSaveButtonVisibility() {
+  if (window.saveButton) {
+    if (isRP2350Driver) {
+      window.saveButton.style('display', 'block');
+      console.log('Save button shown - RP2350 driver detected');
+    } else {
+      window.saveButton.style('display', 'none');
+      console.log('Save button hidden - RP2350 driver not detected');
+    }
   }
 }
 
@@ -293,6 +341,10 @@ async function connectToSerialPort() {
     }
     console.log("Connected to port!");
     
+    // Reset driver detection for new connection
+    isRP2350Driver = false;
+    updateSaveButtonVisibility();
+    
     // Show loading state
     if (window.connectDeviceButton) {
       window.connectDeviceButton.html('<span class="loading-spinner"></span>Connecting...');
@@ -300,6 +352,12 @@ async function connectToSerialPort() {
       window.connectDeviceButton.removeClass('button-connected');
       window.connectDeviceButton.addClass('button-loading');
       window.connectDeviceButton.attribute('disabled', '');
+    }
+    
+    // Hide separator during connecting state
+    const connectedSeparator = select('#connectedSeparator');
+    if (connectedSeparator) {
+      connectedSeparator.style('display', 'none');
     }
     
     // Start reading serial data immediately
@@ -323,6 +381,18 @@ async function connectToSerialPort() {
         window.connectDeviceButton.removeClass('button-loading');
         window.connectDeviceButton.addClass('button-connected');
       }
+      
+      // Show separator when connected
+      const connectedSeparator = select('#connectedSeparator');
+      if (connectedSeparator) {
+        connectedSeparator.style('display', 'block');
+      }
+      
+      // Show main controls when connected
+      const mainControlsContainer = select('#mainControlsContainer');
+      if (mainControlsContainer) {
+        mainControlsContainer.style('display', 'block');
+      }
     }, 3000);
   } catch (error) {
     console.error("Error connecting to serial port: ", error);
@@ -333,6 +403,18 @@ async function connectToSerialPort() {
       window.connectDeviceButton.removeClass('button-connected');
       window.connectDeviceButton.addClass('button-36');
       window.connectDeviceButton.removeAttribute('disabled');
+    }
+    
+    // Hide main controls when disconnected
+    const mainControlsContainer = select('#mainControlsContainer');
+    if (mainControlsContainer) {
+      mainControlsContainer.style('display', 'none');
+    }
+    
+    // Hide separator when disconnected
+    const connectedSeparator = select('#connectedSeparator');
+    if (connectedSeparator) {
+      connectedSeparator.style('display', 'none');
     }
     // Restart periodic auto-connect
     if (!serialConnected && !serialAutoConnectInterval && 'serial' in navigator) {
@@ -361,6 +443,10 @@ async function autoConnectToSerialPort(port) {
       serialAutoConnectInterval = null;
     }
     
+    // Reset driver detection for new connection
+    isRP2350Driver = false;
+    updateSaveButtonVisibility();
+    
     // Show loading state
     if (window.connectDeviceButton) {
       window.connectDeviceButton.html('<span class="loading-spinner"></span>Connecting...');
@@ -368,6 +454,12 @@ async function autoConnectToSerialPort(port) {
       window.connectDeviceButton.removeClass('button-connected');
       window.connectDeviceButton.addClass('button-loading');
       window.connectDeviceButton.attribute('disabled', '');
+    }
+    
+    // Hide separator during connecting state
+    const connectedSeparator = select('#connectedSeparator');
+    if (connectedSeparator) {
+      connectedSeparator.style('display', 'none');
     }
     
     // Start reading serial data immediately
@@ -390,6 +482,18 @@ async function autoConnectToSerialPort(port) {
         window.connectDeviceButton.html('Connected');
         window.connectDeviceButton.removeClass('button-loading');
         window.connectDeviceButton.addClass('button-connected');
+      }
+      
+      // Show separator when connected
+      const connectedSeparator = select('#connectedSeparator');
+      if (connectedSeparator) {
+        connectedSeparator.style('display', 'block');
+      }
+      
+      // Show main controls when connected
+      const mainControlsContainer = select('#mainControlsContainer');
+      if (mainControlsContainer) {
+        mainControlsContainer.style('display', 'block');
       }
     }, 3000);
     
@@ -443,6 +547,18 @@ async function readSerialLoop() {
       window.connectDeviceButton.addClass('button-36');
       window.connectDeviceButton.removeAttribute('disabled');
     }
+    
+    // Hide main controls when disconnected
+    const mainControlsContainer = select('#mainControlsContainer');
+    if (mainControlsContainer) {
+      mainControlsContainer.style('display', 'none');
+    }
+    
+    // Hide separator when disconnected
+    const connectedSeparator = select('#connectedSeparator');
+    if (connectedSeparator) {
+      connectedSeparator.style('display', 'none');
+    }
     // Restart periodic auto-connect
     if (!serialConnected && !serialAutoConnectInterval && 'serial' in navigator) {
       function tryAutoConnect() {
@@ -466,8 +582,18 @@ function parseAndApplyConfig(configText) {
   const lines = configText.split(/\r?\n/);
   let palette = false, test = false, brightness = 128, speed = 128, numColors = 3, rgbColors = [];
   let rgbSection = false;
+  let driverDetected = false;
+  
   for (let line of lines) {
-    if (line.startsWith('Palette:')) palette = line.split(':')[1].trim() === 'true';
+    if (line.startsWith('Driver:')) {
+      const driver = line.split(':')[1].trim();
+      if (driver === 'rp2350') {
+        isRP2350Driver = true;
+        driverDetected = true;
+        console.log('RP2350 driver detected!');
+      }
+    }
+    else if (line.startsWith('Palette:')) palette = line.split(':')[1].trim() === 'true';
     else if (line.startsWith('Test:')) test = line.split(':')[1].trim() === 'true';
     else if (line.startsWith('Brightness:')) brightness = parseInt(line.split(':')[1].trim());
     else if (line.startsWith('Speed:')) speed = parseInt(line.split(':')[1].trim());
@@ -477,6 +603,9 @@ function parseAndApplyConfig(configText) {
       rgbColors.push(line.trim().padStart(6, '0').toUpperCase());
     }
   }
+  
+  // Update save button visibility based on driver detection
+  updateSaveButtonVisibility();
   // Log parsed values as requested
   console.log('PARSED_PALETTE_VALUE:', palette);
   console.log('PARSED_TEST_VALUE:', test);
