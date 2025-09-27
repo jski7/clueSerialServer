@@ -10,6 +10,8 @@ let serialConnected = false;
 let serialBuffer = '';
 let isConfigLoading = false;
 let isRP2350Driver = false; // Track if rp2350 driver is detected
+let readCommandInterval = null; // Track read command interval
+let configReceived = false; // Track if config has been received
 
 function setup() {
   // Initialize animation with default settings
@@ -47,7 +49,8 @@ function setup() {
   configLabel.style('font-size', '12px').style('font-weight', 'normal').style('color', '#888888').style('letter-spacing', '0.5px').style('text-transform', 'uppercase');
 
   // Create a horizontal container for the connect button only
-  let buttonContainer = createDiv().parent(container).style('display', 'flex').style('justify-content', 'center').style('gap', '10px').style('margin-bottom', '20px');
+  let buttonContainer = createDiv().parent(container).style('display', 'flex').style('justify-content', 'center').style('gap', '10px').style('margin-bottom', '0px');
+  window.buttonContainer = buttonContainer; // Store reference globally for access
   
   // Connect to device button
   let button = createButton("Select Device").parent(buttonContainer);
@@ -60,6 +63,7 @@ function setup() {
   let connectedSeparator = createDiv().parent(container);
   connectedSeparator.class('section-divider');
   connectedSeparator.id('connectedSeparator');
+  connectedSeparator.style('display', 'none'); // Initially hidden until connected
 
   // Create container for main controls (brightness, speed, palette)
   let mainControlsContainer = createDiv().parent(container);
@@ -219,6 +223,57 @@ function updateSaveButtonVisibility() {
   }
 }
 
+// Function to start sending read commands every second
+function startReadCommandLoop() {
+  if (readCommandInterval) {
+    clearInterval(readCommandInterval);
+  }
+  
+  readCommandInterval = setInterval(() => {
+    if (writer && serialConnected && !configReceived) {
+      const encoder = new TextEncoder();
+      const encodedData = encoder.encode('read\n');
+      writer.write(encodedData).then(() => {
+        console.log('Sent: read (waiting for config)');
+      }).catch(err => {
+        console.error('Error sending read command:', err);
+      });
+    } else if (configReceived) {
+      // Stop sending read commands once config is received
+      clearInterval(readCommandInterval);
+      readCommandInterval = null;
+      console.log('Config received, stopping read command loop');
+    }
+  }, 1000);
+}
+
+// Function to complete connection process
+function completeConnection() {
+  // Update button to connected state
+  if (window.connectDeviceButton) {
+    window.connectDeviceButton.html('Connected');
+    window.connectDeviceButton.removeClass('button-loading');
+    window.connectDeviceButton.addClass('button-connected');
+  }
+  
+  // Set bottom margin of button container back to 20px when connected
+  if (window.buttonContainer) {
+    window.buttonContainer.style('margin-bottom', '20px');
+  }
+  
+  // Show separator when connected
+  const connectedSeparator = select('#connectedSeparator');
+  if (connectedSeparator) {
+    connectedSeparator.style('display', 'block');
+  }
+  
+  // Show main controls when connected
+  const mainControlsContainer = select('#mainControlsContainer');
+  if (mainControlsContainer) {
+    mainControlsContainer.style('display', 'block');
+  }
+}
+
 function updateRGBInputs() {
   // Store current values
   let currentValues = rgbInputs.map(input => input.value());
@@ -343,6 +398,7 @@ async function connectToSerialPort() {
     
     // Reset driver detection for new connection
     isRP2350Driver = false;
+    configReceived = false;
     updateSaveButtonVisibility();
     
     // Show loading state
@@ -363,37 +419,8 @@ async function connectToSerialPort() {
     // Start reading serial data immediately
     readSerialLoop();
     
-    // Send 'read' command after 3 seconds
-    setTimeout(() => {
-      if (writer && serialConnected) {
-        const encoder = new TextEncoder();
-        const encodedData = encoder.encode('read\n');
-        writer.write(encodedData).then(() => {
-          console.log('Sent: read');
-        }).catch(err => {
-          console.error('Error sending read command:', err);
-        });
-      }
-      
-      // Update button to connected state
-      if (window.connectDeviceButton) {
-        window.connectDeviceButton.html('Connected');
-        window.connectDeviceButton.removeClass('button-loading');
-        window.connectDeviceButton.addClass('button-connected');
-      }
-      
-      // Show separator when connected
-      const connectedSeparator = select('#connectedSeparator');
-      if (connectedSeparator) {
-        connectedSeparator.style('display', 'block');
-      }
-      
-      // Show main controls when connected
-      const mainControlsContainer = select('#mainControlsContainer');
-      if (mainControlsContainer) {
-        mainControlsContainer.style('display', 'block');
-      }
-    }, 3000);
+    // Start sending read commands every second until config is received
+    startReadCommandLoop();
   } catch (error) {
     console.error("Error connecting to serial port: ", error);
     // On error, update UI to disconnected state
@@ -415,6 +442,22 @@ async function connectToSerialPort() {
     const connectedSeparator = select('#connectedSeparator');
     if (connectedSeparator) {
       connectedSeparator.style('display', 'none');
+    }
+    
+    // Clear read command interval
+    if (readCommandInterval) {
+      clearInterval(readCommandInterval);
+      readCommandInterval = null;
+    }
+    
+    // Hide save button when disconnected
+    if (window.saveButton) {
+      window.saveButton.style('display', 'none');
+    }
+    
+    // Set bottom margin of button container back to 0px when disconnected
+    if (window.buttonContainer) {
+      window.buttonContainer.style('margin-bottom', '0px');
     }
     // Restart periodic auto-connect
     if (!serialConnected && !serialAutoConnectInterval && 'serial' in navigator) {
@@ -445,6 +488,7 @@ async function autoConnectToSerialPort(port) {
     
     // Reset driver detection for new connection
     isRP2350Driver = false;
+    configReceived = false;
     updateSaveButtonVisibility();
     
     // Show loading state
@@ -465,37 +509,8 @@ async function autoConnectToSerialPort(port) {
     // Start reading serial data immediately
     readSerialLoop();
     
-    // Send 'read' command after 3 seconds
-    setTimeout(() => {
-      if (writer && serialConnected) {
-        const encoder = new TextEncoder();
-        const encodedData = encoder.encode('read\n');
-        writer.write(encodedData).then(() => {
-          console.log('Sent: read');
-        }).catch(err => {
-          console.error('Error sending read command:', err);
-        });
-      }
-      
-      // Update button to connected state
-      if (window.connectDeviceButton) {
-        window.connectDeviceButton.html('Connected');
-        window.connectDeviceButton.removeClass('button-loading');
-        window.connectDeviceButton.addClass('button-connected');
-      }
-      
-      // Show separator when connected
-      const connectedSeparator = select('#connectedSeparator');
-      if (connectedSeparator) {
-        connectedSeparator.style('display', 'block');
-      }
-      
-      // Show main controls when connected
-      const mainControlsContainer = select('#mainControlsContainer');
-      if (mainControlsContainer) {
-        mainControlsContainer.style('display', 'block');
-      }
-    }, 3000);
+    // Start sending read commands every second until config is received
+    startReadCommandLoop();
     
     console.log('Auto-connected to serial port!');
   } catch (err) {
@@ -558,6 +573,22 @@ async function readSerialLoop() {
     const connectedSeparator = select('#connectedSeparator');
     if (connectedSeparator) {
       connectedSeparator.style('display', 'none');
+    }
+    
+    // Clear read command interval
+    if (readCommandInterval) {
+      clearInterval(readCommandInterval);
+      readCommandInterval = null;
+    }
+    
+    // Hide save button when disconnected
+    if (window.saveButton) {
+      window.saveButton.style('display', 'none');
+    }
+    
+    // Set bottom margin of button container back to 0px when disconnected
+    if (window.buttonContainer) {
+      window.buttonContainer.style('margin-bottom', '0px');
     }
     // Restart periodic auto-connect
     if (!serialConnected && !serialAutoConnectInterval && 'serial' in navigator) {
@@ -655,5 +686,11 @@ function parseAndApplyConfig(configText) {
     }
     updateVisibility(palette); // Ensure UI reflects palette state
     isConfigLoading = false;
+    
+    // Mark config as received and complete connection
+    if (!configReceived) {
+      configReceived = true;
+      completeConnection();
+    }
   }, 100); // Wait for DOM update
 } 
