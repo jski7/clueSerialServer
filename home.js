@@ -12,6 +12,7 @@ let isConfigLoading = false;
 let isRP2350Driver = false; // Track if rp2350 driver is detected
 let readCommandInterval = null; // Track read command interval
 let configReceived = false; // Track if config has been received
+let colorOrderSelect; // Color order selection dropdown
 
 function setup() {
   // Initialize animation with default settings
@@ -78,7 +79,7 @@ function setup() {
   brightnessSlider.input(function() {
     let val = brightnessSlider.value();
     brightnessValue.html(val);
-    sendSingleSerialCommand('b', val);
+    sendSerial('b', val);
   });
 
   // Speed slider
@@ -89,7 +90,22 @@ function setup() {
   speedSlider.input(function() {
     let val = speedSlider.value();
     speedValue.html(val);
-    sendSingleSerialCommand('s', val);
+    sendSerial('s', val);
+  });
+
+  // Color Order selection
+  let colorOrderRow = createDiv().parent(mainControlsContainer).style('display', 'flex').style('flex-direction', 'row').style('align-items', 'center').style('justify-content', 'center').style('margin-bottom', '10px');
+  let colorOrderLabel = createSpan('Color Order').parent(colorOrderRow).style('margin-right', '10px').style('min-width', '80px').style('text-align', 'right');
+  colorOrderSelect = createSelect().parent(colorOrderRow).style('width', '150px').style('margin', '0 10px');
+  colorOrderSelect.option('RGB');
+  colorOrderSelect.option('BGR');
+  colorOrderSelect.option('GRB');
+  colorOrderSelect.option('GBR');
+  colorOrderSelect.option('BRG');
+  colorOrderSelect.option('RBG');
+  colorOrderSelect.value('RGB'); // Set default value
+  colorOrderSelect.changed(() => {
+    sendSerialData(); // Send updated colors with new order
   });
   
   // Add separator after speed slider
@@ -164,7 +180,7 @@ function setup() {
   saveButton.class('button-36');
   saveButton.style('display', 'none'); // Initially hidden until rp2350 driver is detected
   saveButton.mousePressed(() => {
-    sendSingleSerialCommand('w');
+    sendSerial('w');
   });
   window.saveButton = saveButton; // Store reference globally for access
 
@@ -187,6 +203,7 @@ function setup() {
   window.numColorsInput = numColorsInput;
   window.rgbInputs = rgbInputs;
   window.colorPickers = colorPickers;
+  window.colorOrderSelect = colorOrderSelect;
   
   // Ensure save button starts hidden
   updateSaveButtonVisibility();
@@ -312,6 +329,25 @@ function updateRGBInputs() {
   createElement('br').parent(rgbInputContainer);
 }
 
+// Function to convert RGB hex to different color orders
+function convertColorOrder(hexColor, order) {
+  if (hexColor.length !== 6) return hexColor; // Return as-is if not valid hex
+  
+  let r = hexColor.substring(0, 2);
+  let g = hexColor.substring(2, 4);
+  let b = hexColor.substring(4, 6);
+  
+  switch (order) {
+    case 'RGB': return r + g + b;
+    case 'BGR': return b + g + r;
+    case 'GRB': return g + r + b;
+    case 'GBR': return g + b + r;
+    case 'BRG': return b + r + g;
+    case 'RBG': return r + b + g;
+    default: return hexColor;
+  }
+}
+
 function sendSerialData() {
   if (isConfigLoading) {
     console.warn('Config is loading, not sending new data yet.');
@@ -324,11 +360,14 @@ function sendSerialData() {
   // Get the number of colors
   let numColors = int(numColorsInput.value());
 
-  // Get the RGB values
+  // Get the RGB values and convert them according to selected color order
   let rgbValues = [];
+  let colorOrder = colorOrderSelect ? colorOrderSelect.value() : 'RGB';
+  
   for (let i = 0; i < rgbInputs.length; i++) {
     let colorHex = rgbInputs[i].value();
-    rgbValues.push(colorHex.toUpperCase());  // Store hex color without the '#'
+    let convertedColor = convertColorOrder(colorHex.toUpperCase(), colorOrder);
+    rgbValues.push(convertedColor);
   }
 
   // Construct the data string in the format "true,5,FF0000,00FF00,0000FF"
@@ -350,12 +389,13 @@ function sendSerialData() {
 
   console.log("Data sent to serial:");
   console.log(dataString);
+  console.log("Color order used:", colorOrder);
   
-  // Update the colors array with the new RGB values
-  if (rgbValues.length > 0) {
+  // Update the colors array with the new RGB values (keep original RGB for display)
+  if (rgbInputs.length > 0) {
     colors.length = 0; // Clear the existing colors array
-    for (let i = 0; i < rgbValues.length; i++) {
-      let hex = rgbValues[i];
+    for (let i = 0; i < rgbInputs.length; i++) {
+      let hex = rgbInputs[i].value(); // Use original RGB for display
       let r = parseInt(hex.substring(0, 2), 16);
       let g = parseInt(hex.substring(2, 4), 16);
       let b = parseInt(hex.substring(4, 6), 16);
@@ -368,7 +408,7 @@ function draw() {
   renderLamp(height/8, height/8, colors);
 }
 
-function sendSingleSerialCommand(prefix, value) {
+function sendSerial(prefix, value) {
   if (writer) {
     const textToSend = value !== undefined ? `${prefix}${value}` : prefix;
     const encoder = new TextEncoder();
