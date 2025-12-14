@@ -1,47 +1,61 @@
-// Update page specific code
+// Update page specific code - selection page
 let colors = defaultColors.slice(); // Clone the default colors
-let rgbInputContainer;  // Container to hold the RGB input fields
 
-async function setup() {
+function setup() {
   // Initialize animation with a higher frame rate
   initAnimation(0.3, 120);
 
-  // Create a div to hold everything and center it
+  // Create a div to hold everything - positioned at bottom like lamp/charm pages
   let container = createDiv();
   container.parent(select('main'));
-  container.id('centered-content'); // Assign an ID for styling
-  container.style('margin-top', `${windowHeight * 0.1}px`); // Add margin of 20% of window height
+  container.id('centered-content'); // Assign an ID for styling (white box)
+  container.style('position', 'fixed');
+  container.style('bottom', '40px');
+  container.style('left', '50%');
+  container.style('transform', 'translateX(-50%)');
+  container.style('z-index', '10');
   
-  // Fetch version from manifest.json
-  let manifestResponse = await fetch('./firmware/manifest.json');
-  let manifest = await manifestResponse.json();
-  let version = manifest.version;
+  // Create button container
+  let buttonContainer = createDiv();
+  buttonContainer.parent(container);
+  buttonContainer.style('display', 'flex');
+  buttonContainer.style('flex-direction', 'column');
+  buttonContainer.style('gap', '15px');
+  buttonContainer.style('align-items', 'center');
+  buttonContainer.style('padding', '10px 0');
   
-  // Add ESP Web Install Button with custom styling and dynamic version
-  let installbutton = 
-`<esp-web-install-button
-  manifest="./firmware/manifest.json">
-  <button slot="activate" class="button-36">update to v${version}</button>
-</esp-web-install-button>`;
+  // Create Lamp button - styled like button-36 (purple)
+  let lampButton = createButton('update lamp');
+  lampButton.parent(buttonContainer);
+  lampButton.class('button-36');
+  lampButton.style('width', '100%');
+  lampButton.mousePressed(() => {
+    // Use relative path - works from both /update/ and root
+    let path = window.location.pathname;
+    if (path.endsWith('/update/') || path.endsWith('/update')) {
+      window.location.href = './lamp/';
+    } else {
+      window.location.href = './update/lamp/';
+    }
+  });
   
-  let espWebInstallButton = createDiv().parent(container);
-  espWebInstallButton.html(installbutton);
-  espWebInstallButton.style('display', 'flex');
-  espWebInstallButton.style('justify-content', 'center');
-
-  // Create a container for RGB inputs
-  rgbInputContainer = createDiv().parent(container);
-
-  // Load firmware files
-  const firmwareFiles = [
-    { name: 'bootloader.bin', url: '/firmware/bootloader.bin' },
-    { name: 'partitions.bin', url: '/firmware/partitions.bin' },
-    { name: 'boot_app0.bin', url: '/firmware/boot_app0.bin' },
-    { name: 'firmware.bin', url: '/firmware/firmware.bin' }
-  ];
+  // Create Charm button - styled like button-36 (purple)
+  let charmButton = createButton('update charm');
+  charmButton.parent(buttonContainer);
+  charmButton.class('button-36');
+  charmButton.style('width', '100%');
+  charmButton.mousePressed(() => {
+    // Use relative path - works from both /update/ and root
+    let path = window.location.pathname;
+    if (path.endsWith('/update/') || path.endsWith('/update')) {
+      window.location.href = './charm/';
+    } else {
+      window.location.href = './update/charm/';
+    }
+  });
 }
 
 function draw() {
-  // Render the lamp with higher resolution for the update page
+  // Render the lamp animation at the top - same as lamp/charm pages
   renderLamp(height/8, height/8, colors);
-} 
+}

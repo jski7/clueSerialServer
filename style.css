@@ -24,6 +24,11 @@ body, html {
     font-size: 12px;
   }
 
+  /* Update page specific: position white box at bottom */
+  body:has(#centered-content[style*="position: absolute"]) #centered-content {
+    margin: 0;
+  }
+
 /* CSS */
 .button-36 {
 background-image: linear-gradient(92.88deg, #7600FF 9.16%, #7600FF 43.89%, #7600FF 64.72%);
@@ -214,6 +219,7 @@ span {
 #defaultCanvas0 {
   display: block;
   margin: 0 auto;
+  margin-bottom: 200px;
 }
 
 @media (max-width: 600px) {
