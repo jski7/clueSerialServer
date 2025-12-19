@@ -30,12 +30,14 @@ function setup() {
   lampButton.class('button-36');
   lampButton.style('width', '100%');
   lampButton.mousePressed(() => {
-    // Use relative path - works from both /update/ and root
-    let path = window.location.pathname;
-    if (path.endsWith('/update/') || path.endsWith('/update')) {
-      window.location.href = './lamp/';
+    // Construct path relative to current page location for GitHub Pages compatibility
+    let basePath = window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/') + 1);
+    if (window.location.pathname.endsWith('update.html')) {
+      // If we're on update.html, go to update/lamp/
+      window.location.href = basePath + 'update/lamp/';
     } else {
-      window.location.href = './update/lamp/';
+      // If we're in update/ directory, go to lamp/
+      window.location.href = basePath + 'lamp/';
     }
   });
   
@@ -45,12 +47,14 @@ function setup() {
   charmButton.class('button-36');
   charmButton.style('width', '100%');
   charmButton.mousePressed(() => {
-    // Use relative path - works from both /update/ and root
-    let path = window.location.pathname;
-    if (path.endsWith('/update/') || path.endsWith('/update')) {
-      window.location.href = './charm/';
+    // Construct path relative to current page location for GitHub Pages compatibility
+    let basePath = window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/') + 1);
+    if (window.location.pathname.endsWith('update.html')) {
+      // If we're on update.html, go to update/charm/
+      window.location.href = basePath + 'update/charm/';
     } else {
-      window.location.href = './update/charm/';
+      // If we're in update/ directory, go to charm/
+      window.location.href = basePath + 'charm/';
     }
   });
 }
