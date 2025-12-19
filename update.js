@@ -30,15 +30,12 @@ function setup() {
   lampButton.class('button-36');
   lampButton.style('width', '100%');
   lampButton.mousePressed(() => {
-    // Construct path relative to current page location for GitHub Pages compatibility
-    let basePath = window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/') + 1);
-    if (window.location.pathname.endsWith('update.html')) {
-      // If we're on update.html, go to update/lamp/
-      window.location.href = basePath + 'update/lamp/';
-    } else {
-      // If we're in update/ directory, go to lamp/
-      window.location.href = basePath + 'lamp/';
-    }
+    // Get base path (everything up to and including the last slash)
+    // For /clueSerialServer/update.html, basePath will be /clueSerialServer/
+    let pathname = window.location.pathname;
+    let basePath = pathname.substring(0, pathname.lastIndexOf('/') + 1);
+    // Always navigate to update/lamp/ from update.html
+    window.location.href = basePath + 'update/lamp/';
   });
   
   // Create Charm button - styled like button-36 (purple)
@@ -47,15 +44,12 @@ function setup() {
   charmButton.class('button-36');
   charmButton.style('width', '100%');
   charmButton.mousePressed(() => {
-    // Construct path relative to current page location for GitHub Pages compatibility
-    let basePath = window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/') + 1);
-    if (window.location.pathname.endsWith('update.html')) {
-      // If we're on update.html, go to update/charm/
-      window.location.href = basePath + 'update/charm/';
-    } else {
-      // If we're in update/ directory, go to charm/
-      window.location.href = basePath + 'charm/';
-    }
+    // Get base path (everything up to and including the last slash)
+    // For /clueSerialServer/update.html, basePath will be /clueSerialServer/
+    let pathname = window.location.pathname;
+    let basePath = pathname.substring(0, pathname.lastIndexOf('/') + 1);
+    // Always navigate to update/charm/ from update.html
+    window.location.href = basePath + 'update/charm/';
   });
 }
 
