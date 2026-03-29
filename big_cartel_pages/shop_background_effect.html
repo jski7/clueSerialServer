@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<!--
+  clue. — animated shop background (same effect as about.html + links.html)
+
+  HOW TO USE
+  ──────────
+  • Preview: open this file in a browser (fullscreen soft gradient blobs).
+
+  • Big Cartel: themes differ; typical steps:
+    1) Custom CSS: include the canvas rules below. Set body (and often html) to
+       background transparent so the canvas is visible; the script paints the
+       same #fafafa base as clue. pages.
+    2) Add <canvas id="clue-shop-bg-canvas" …></canvas> + the script (footer
+       injection is OK — the script moves the canvas to the first position in
+       <body> so it cannot cover the header, logo, or products).
+    3) If anything still hides, give your theme’s main wrapper a stacking
+       context, e.g. position: relative; z-index: 1; isolation: isolate;
+       (see commented selectors at bottom of <style>).
+
+  Tweak motion/colours in CONFIG inside the script (search for const CONFIG).
+-->
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>clue. — background effect only</title>
+  <style>
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html,
+    body {
+      min-height: 100%;
+      height: 100%;
+    }
+
+    html {
+      background-color: #fafafa;
+    }
+
+    body {
+      font-family: system-ui, sans-serif;
+      background: transparent;
+      overflow-x: hidden;
+    }
+
+    /*
+      Behind everything: z-index -1 + transparent body so blobs show.
+      Script also prepends canvas to body if it was injected at the bottom
+      (otherwise a late canvas can paint over the whole shop).
+    */
+    #clue-shop-bg-canvas {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      pointer-events: none;
+    }
+
+    /* Big Cartel: let the animated canvas show through the nav bar */
+    .header-nav-container {
+      background: transparent !important;
+      padding: 24px 0;
+      position: relative;
+      z-index: 10;
+      transition: box-shadow 0.2s linear;
+    }
+
+    /*
+      ── Big Cartel: paste/adapt ONE rule for your theme’s outer wrapper ─────
+      Uncomment and fix the selector after inspecting the shop in DevTools.
+
+    #page,
+    #Page,
+    #site,
+    .site,
+    #wrapper,
+    .wrapper,
+    main {
+      position: relative;
+      z-index: 1;
+      isolation: isolate;
+    }
+
+    body {
+      background: transparent !important;
+    }
+    */
+
+    /* Demo only: sample content above the canvas */
+    .demo-content {
+      position: relative;
+      z-index: 1;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      color: #3a3a3a;
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="clue-shop-bg-canvas" aria-hidden="true"></canvas>
+
+  <div class="demo-content">
+    <p>content sits above the canvas (z-index: 1) — remove this block on a real shop page</p>
+  </div>
+
+  <script>
+  (function () {
+    const CONFIG = {
+      canvasId: 'clue-shop-bg-canvas',
+      baseFill: '#fafafa',
+      blobAlpha: 0.38,
+      speedScale: 1,
+      radiusMinRatio: 0.25,
+      radiusRangeRatio: 0.2,
+      colors: [
+        [255, 160, 200],
+        [160, 180, 255],
+        [255, 220, 160],
+        [180, 240, 200],
+        [210, 170, 255],
+      ],
+    };
+
+    const canvas = document.getElementById(CONFIG.canvasId);
+    const ctx = canvas && canvas.getContext('2d');
+    if (!canvas || !ctx) return;
+
+    if (canvas.parentNode === document.body && document.body.firstElementChild !== canvas) {
+      document.body.insertBefore(canvas, document.body.firstElementChild);
+    }
+
+    let W = 0;
+    let H = 0;
+    let blobs;
+
+    function initBlobs() {
+      const spd = CONFIG.speedScale;
+      blobs = CONFIG.colors.map(function (rgb) {
+        return {
+          x: Math.random() * W,
+          y: Math.random() * H,
+          r: W * (CONFIG.radiusMinRatio + Math.random() * CONFIG.radiusRangeRatio),
+          rgb: rgb,
+          vx: (Math.random() - 0.5) * 0.3 * spd,
+          vy: (Math.random() - 0.5) * 0.3 * spd,
+        };
+      });
+    }
+
+    function scaleBlobsTo(newW, newH) {
+      if (W < 1 || H < 1 || !blobs || blobs.length !== CONFIG.colors.length) return false;
+      const sx = newW / W;
+      const sy = newH / H;
+      const sR = Math.sqrt(sx * sy);
+      blobs.forEach(function (b) {
+        b.x *= sx;
+        b.y *= sy;
+        b.r *= sR;
+        b.x = Math.max(-b.r, Math.min(newW + b.r, b.x));
+        b.y = Math.max(-b.r, Math.min(newH + b.r, b.y));
+      });
+      return true;
+    }
+
+    function applyResize() {
+      const newW = window.innerWidth;
+      const newH = window.innerHeight;
+      if (newW < 1 || newH < 1) return;
+
+      if (W < 1 || H < 1) {
+        W = newW;
+        H = newH;
+        canvas.width = W;
+        canvas.height = H;
+        initBlobs();
+        return;
+      }
+
+      if (newW === W && newH === H) return;
+      scaleBlobsTo(newW, newH);
+      W = newW;
+      H = newH;
+      canvas.width = W;
+      canvas.height = H;
+    }
+
+    let resizeRaf = 0;
+    function scheduleResize() {
+      if (resizeRaf) return;
+      resizeRaf = requestAnimationFrame(function () {
+        resizeRaf = 0;
+        applyResize();
+      });
+    }
+
+    function draw() {
+      if (W < 1 || H < 1 || !blobs) {
+        requestAnimationFrame(draw);
+        return;
+      }
+
+      const a = CONFIG.blobAlpha;
+      ctx.clearRect(0, 0, W, H);
+      ctx.fillStyle = CONFIG.baseFill;
+      ctx.fillRect(0, 0, W, H);
+
+      blobs.forEach(function (b) {
+        const grd = ctx.createRadialGradient(b.x, b.y, 0, b.x, b.y, b.r);
+        grd.addColorStop(0, 'rgba(' + b.rgb[0] + ',' + b.rgb[1] + ',' + b.rgb[2] + ',' + a + ')');
+        grd.addColorStop(1, 'rgba(' + b.rgb[0] + ',' + b.rgb[1] + ',' + b.rgb[2] + ',0)');
+        ctx.fillStyle = grd;
+        ctx.beginPath();
+        ctx.arc(b.x, b.y, b.r, 0, Math.PI * 2);
+        ctx.fill();
+
+        b.x += b.vx;
+        b.y += b.vy;
+        if (b.x < -b.r || b.x > W + b.r) b.vx *= -1;
+        if (b.y < -b.r || b.y > H + b.r) b.vy *= -1;
+      });
+
+      requestAnimationFrame(draw);
+    }
+
+    window.addEventListener('resize', scheduleResize);
+    applyResize();
+    draw();
+  })();
+  </script>
+</body>
+</html>

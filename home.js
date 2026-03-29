@@ -37,7 +37,6 @@ function setup() {
   let container = createDiv();
   container.parent(select('main'));
   container.id('centered-content');
-  container.style('margin-top', `${windowHeight * 0.1}px`);
 
   // Add logo at the top
   let logoContainer = createDiv().parent(container).style('display', 'flex').style('justify-content', 'center').style('margin-top', '10px').style('margin-bottom', '10px');
@@ -47,7 +46,7 @@ function setup() {
   // Add config label below logo
   let configContainer = createDiv().parent(container).style('display', 'flex').style('justify-content', 'center').style('margin-bottom', '20px');
   let configLabel = createSpan('config').parent(configContainer);
-  configLabel.style('font-size', '12px').style('font-weight', 'normal').style('color', '#888888').style('letter-spacing', '0.5px').style('text-transform', 'uppercase');
+  configLabel.addClass('config-page-label');
 
   // Create a horizontal container for the connect button only
   let buttonContainer = createDiv().parent(container).style('display', 'flex').style('justify-content', 'center').style('gap', '10px').style('margin-bottom', '0px');
@@ -74,7 +73,7 @@ function setup() {
   // Brightness slider
   let brightnessRow = createDiv().parent(mainControlsContainer).style('display', 'flex').style('flex-direction', 'row').style('align-items', 'center').style('justify-content', 'center').style('margin-bottom', '10px');
   let brightnessLabel = createSpan('Brightness').parent(brightnessRow).style('margin-right', '10px').style('min-width', '80px').style('text-align', 'right');
-  let brightnessSlider = createSlider(0, 255, 128, 1).parent(brightnessRow).style('width', '150px').style('accent-color', '#7600FF').style('margin', '0 10px');
+  let brightnessSlider = createSlider(0, 255, 128, 1).parent(brightnessRow).style('width', '150px').style('accent-color', '#6600ff').style('margin', '0 10px');
   let brightnessValue = createSpan('128').parent(brightnessRow).style('min-width', '32px').style('display', 'inline-block').style('text-align', 'left');
   brightnessSlider.input(function() {
     let val = brightnessSlider.value();
@@ -85,7 +84,7 @@ function setup() {
   // Speed slider
   let speedRow = createDiv().parent(mainControlsContainer).style('display', 'flex').style('flex-direction', 'row').style('align-items', 'center').style('justify-content', 'center').style('margin-bottom', '10px');
   let speedLabel = createSpan('Speed').parent(speedRow).style('margin-right', '10px').style('min-width', '80px').style('text-align', 'right');
-  let speedSlider = createSlider(0, 255, 128, 1).parent(speedRow).style('width', '150px').style('accent-color', '#7600FF').style('margin', '0 10px');
+  let speedSlider = createSlider(0, 255, 128, 1).parent(speedRow).style('width', '150px').style('accent-color', '#6600ff').style('margin', '0 10px');
   let speedValue = createSpan('128').parent(speedRow).style('min-width', '32px').style('display', 'inline-block').style('text-align', 'left');
   speedSlider.input(function() {
     let val = speedSlider.value();

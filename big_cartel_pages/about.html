@@ -1,0 +1,1465 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>clue. — about</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap');
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --purple: #6600ff;
+      --text: #3a3a3a;
+      --text-light: #6a6a6a;
+      --bg: #fafafa;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      overflow-x: hidden;
+    }
+
+    #bg-canvas {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    /* ── Nav ── */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 24px 48px;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+
+    .logo {
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: var(--purple);
+      letter-spacing: -0.04em;
+      text-decoration: none;
+    }
+
+    .shop-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 10px 24px;
+      font-size: 0.85rem;
+      font-weight: 500;
+      letter-spacing: 0.08em;
+      text-transform: lowercase;
+      text-decoration: none;
+      color: #fff;
+      background: var(--purple);
+      border-radius: 100px;
+      border: none;
+      cursor: pointer;
+      transition: background 0.2s ease, box-shadow 0.2s ease, transform 0.15s ease;
+      box-shadow: 0 2px 14px rgba(102, 0, 255, 0.28);
+    }
+
+    .shop-btn:hover {
+      background: #5500dd;
+      box-shadow: 0 4px 20px rgba(102, 0, 255, 0.35);
+      transform: translateY(-1px);
+    }
+
+    .shop-btn:active { transform: translateY(0); }
+
+    section { position: relative; z-index: 10; }
+
+    /* ── Hero ── */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding: 120px 24px 40px;
+    }
+
+    .hero-tag {
+      font-size: 0.75rem;
+      font-weight: 500;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--purple);
+      margin-bottom: 24px;
+      opacity: 0;
+      animation: fadeUp 0.8s ease 0.2s forwards;
+    }
+
+    .hero h1 {
+      font-size: clamp(2.4rem, 6vw, 5rem);
+      font-weight: 600;
+      letter-spacing: -0.04em;
+      line-height: 1.1;
+      max-width: 800px;
+      opacity: 0;
+      animation: fadeUp 0.8s ease 0.4s forwards;
+    }
+
+    .hero h1 span { color: var(--purple); }
+
+    .hero-desc {
+      max-width: 36rem;
+      margin-top: 28px;
+      font-size: 1.05rem;
+      line-height: 1.75;
+      color: var(--text-light);
+      opacity: 0;
+      animation: fadeUp 0.8s ease 0.6s forwards;
+    }
+
+    .hero-desc__stanza {
+      display: block;
+      text-wrap: balance;
+    }
+
+    .hero-desc__stanza + .hero-desc__stanza {
+      margin-top: 0.4em;
+    }
+
+    @supports (text-wrap: pretty) {
+      .hero-desc__stanza {
+        text-wrap: pretty;
+      }
+    }
+
+    /* ── Stats ── */
+    .numbers-section {
+      padding: 80px 24px 20px;
+      text-align: center;
+      position: relative;
+      z-index: 10;
+    }
+
+    .stat-row {
+      display: flex;
+      justify-content: center;
+      gap: 48px;
+      padding: 24px 24px 64px;
+      flex-wrap: wrap;
+      position: relative;
+      z-index: 10;
+    }
+
+    .stat { text-align: center; }
+
+    .stat-number {
+      font-size: 2.4rem;
+      font-weight: 700;
+      color: var(--purple);
+      letter-spacing: -0.04em;
+      display: block;
+    }
+
+    .stat-label {
+      font-size: 0.8rem;
+      color: var(--text-light);
+      letter-spacing: 0.05em;
+      margin-top: 4px;
+    }
+
+    /* ── Divider ── */
+    .divider {
+      max-width: 900px;
+      margin: 0 auto;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(102,0,255,0.15), transparent);
+    }
+
+    /* ── Story ── */
+    .story { padding: 100px 24px; }
+
+    .story-inner { max-width: 780px; margin: 0 auto; }
+
+    .section-label {
+      font-size: 0.72rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--purple);
+      font-weight: 500;
+      margin-bottom: 20px;
+    }
+
+    .story h2 {
+      font-size: clamp(1.6rem, 3.5vw, 2.6rem);
+      font-weight: 600;
+      letter-spacing: -0.03em;
+      line-height: 1.2;
+      margin-bottom: 28px;
+    }
+
+    .story p {
+      font-size: 1rem;
+      line-height: 1.85;
+      color: var(--text-light);
+      margin-bottom: 18px;
+    }
+
+    .story p strong { color: var(--text); font-weight: 500; }
+
+    .inspiration-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: white;
+      border: 1px solid rgba(102,0,255,0.15);
+      border-radius: 100px;
+      padding: 10px 20px;
+      margin-top: 16px;
+      font-size: 0.85rem;
+      color: var(--text-light);
+      box-shadow: 0 2px 20px rgba(102,0,255,0.06);
+    }
+
+    .inspiration-pill .dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--purple);
+      animation: pulse 2s infinite;
+    }
+
+    /* ── Shader preview ── */
+    .shader-preview {
+      padding: 60px 24px 40px;
+      text-align: center;
+    }
+
+    #shader-container {
+      --grain-opacity: 1; /* ~250% of prior 100% cap (0.55); opacity maxes at 1 */
+      position: relative;
+      width: 100%;
+      max-width: 1000px;
+      height: 480px;
+      display: block;
+      margin: 0 auto;
+      /* Tight circular crop — clips just inside where the shader fades to transparent */
+      -webkit-mask-image: radial-gradient(circle closest-side at 50% 50%, black 80%, transparent 92%);
+      mask-image: radial-gradient(circle closest-side at 50% 50%, black 80%, transparent 92%);
+    }
+
+    #shader-container canvas {
+      display: block;
+      width: 100% !important;
+      height: 100% !important;
+    }
+
+    /* static film grain (SVG fractal noise) */
+    #shader-container::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+      pointer-events: none;
+      opacity: var(--grain-opacity, 0.32);
+      mix-blend-mode: soft-light;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='256' height='256'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.78' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      background-size: 112px 112px;
+      -webkit-mask-image: radial-gradient(circle closest-side at 50% 50%, black 80%, transparent 92%);
+      mask-image: radial-gradient(circle closest-side at 50% 50%, black 80%, transparent 92%);
+    }
+
+    .art-caption {
+      margin-top: 8px;
+      font-size: 0.78rem;
+      color: var(--text-light);
+      letter-spacing: 0.08em;
+    }
+
+    .speed-control {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    .speed-control label {
+      font-size: 0.78rem;
+      color: var(--text-light);
+      letter-spacing: 0.06em;
+    }
+
+    .speed-control input[type=range] {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 140px;
+      height: 3px;
+      border-radius: 2px;
+      background: rgba(102,0,255,0.2);
+      outline: none;
+      cursor: pointer;
+    }
+
+    .speed-control input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 14px; height: 14px;
+      border-radius: 50%;
+      background: var(--purple);
+      cursor: pointer;
+    }
+
+    .speed-control input[type=range]::-moz-range-thumb {
+      width: 14px; height: 14px;
+      border-radius: 50%;
+      background: var(--purple);
+      border: none;
+      cursor: pointer;
+    }
+
+    #speed-label {
+      font-size: 0.78rem;
+      color: var(--purple);
+      font-weight: 500;
+      min-width: 30px;
+      text-align: left;
+    }
+
+    /* ── Creator ── */
+    .creator { padding: 100px 24px; }
+
+    .creator-inner {
+      max-width: 900px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 60px;
+      align-items: start;
+    }
+
+    .creator-identity {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      margin-bottom: 20px;
+    }
+
+    .creator-photo {
+      width: 80px; height: 80px;
+      border-radius: 50%;
+      object-fit: cover;
+      object-position: center top;
+      border: 3px solid rgba(102,0,255,0.15);
+      box-shadow: 0 4px 24px rgba(102,0,255,0.12);
+      flex-shrink: 0;
+    }
+
+    .creator-left h2 {
+      font-size: clamp(1.6rem, 3.5vw, 2.6rem);
+      font-weight: 600;
+      letter-spacing: -0.03em;
+      line-height: 1.2;
+      margin-bottom: 12px;
+    }
+
+    .creator-handle {
+      display: inline-block;
+      font-size: 0.85rem;
+      color: var(--purple);
+      font-weight: 500;
+      background: rgba(102,0,255,0.07);
+      padding: 4px 12px;
+      border-radius: 100px;
+      margin-bottom: 20px;
+    }
+
+    .creator-left p {
+      font-size: 0.97rem;
+      line-height: 1.8;
+      color: var(--text-light);
+    }
+
+    /* ── Achievement cards ── */
+    .achievements {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .achievement-card {
+      background: white;
+      border: 1px solid rgba(0,0,0,0.07);
+      border-radius: 16px;
+      padding: 18px 22px;
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+      box-shadow: 0 2px 16px rgba(0,0,0,0.04);
+      transition: transform 0.2s, box-shadow 0.2s;
+      opacity: 0;
+      transform: translateY(16px);
+    }
+
+    .achievement-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 30px rgba(102,0,255,0.1);
+    }
+
+    .achievement-card.visible {
+      animation: fadeUp 0.5s ease forwards;
+    }
+
+    .ach-icon {
+      width: 38px; height: 38px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, rgba(102,0,255,0.12), rgba(102,0,255,0.04));
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      color: var(--purple);
+    }
+
+    .ach-text strong {
+      display: block;
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: var(--text);
+      margin-bottom: 2px;
+    }
+
+    .ach-text span {
+      font-size: 0.8rem;
+      color: var(--text-light);
+    }
+
+    /* ── FAQ (accordion) ── */
+    #faq { scroll-margin-top: 96px; }
+
+    .faq-section { padding: 100px 24px; }
+
+    .faq-inner { max-width: 720px; margin: 0 auto; }
+
+    .faq-page-title {
+      font-size: clamp(1.55rem, 5.2vw, 2.2rem);
+      font-weight: 600;
+      letter-spacing: -0.03em;
+      color: var(--purple);
+      margin: 0 0 36px;
+      line-height: 1.18;
+      text-align: center;
+    }
+
+    .faq-group { margin-bottom: 40px; }
+
+    .faq-group-title {
+      font-size: 0.72rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--purple);
+      font-weight: 500;
+      margin-bottom: 12px;
+    }
+
+    .faq-item { border-bottom: 1px solid rgba(0,0,0,0.07); }
+
+    .faq-q {
+      width: 100%;
+      background: none;
+      border: none;
+      padding: 18px 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-family: 'Inter', sans-serif;
+      font-size: 1rem;
+      font-weight: 500;
+      color: var(--text);
+      cursor: pointer;
+      text-align: left;
+      transition: color 0.2s;
+    }
+
+    .faq-q:hover { color: var(--purple); }
+
+    .faq-icon {
+      font-size: 1.2rem;
+      font-weight: 300;
+      color: var(--purple);
+      transition: transform 0.3s ease;
+      flex-shrink: 0;
+      margin-left: 16px;
+    }
+
+    .faq-item.open .faq-icon { transform: rotate(45deg); }
+
+    .faq-a {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.35s ease, padding 0.35s ease;
+    }
+
+    .faq-item.open .faq-a {
+      padding-bottom: 16px;
+    }
+
+    .faq-a p {
+      font-size: 0.95rem;
+      line-height: 1.8;
+      color: var(--text-light);
+      margin: 0 0 8px;
+    }
+
+    .faq-a a {
+      color: var(--purple);
+      text-decoration: underline;
+      text-underline-offset: 2px;
+    }
+
+    .faq-a strong { color: var(--text); font-weight: 600; }
+
+    .faq-a ul, .faq-a ol {
+      margin: 6px 0 10px;
+      padding-left: 0;
+      list-style: none;
+    }
+
+    .faq-a li {
+      font-size: 0.93rem;
+      color: var(--text-light);
+      line-height: 1.7;
+      padding: 3px 0 3px 20px;
+      position: relative;
+    }
+
+    .faq-a ul li::before {
+      content: '·';
+      position: absolute;
+      left: 6px;
+      color: var(--purple);
+      font-weight: 800;
+      font-size: 1rem;
+    }
+
+    .faq-a ol { counter-reset: faq-step; }
+
+    .faq-a ol li { counter-increment: faq-step; }
+
+    .faq-a ol li::before {
+      content: counter(faq-step);
+      position: absolute;
+      left: 0;
+      top: 5px;
+      width: 16px;
+      height: 16px;
+      background: var(--purple);
+      color: #fff;
+      border-radius: 50%;
+      font-size: 0.62rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .whats-included {
+      margin: 8px 0 18px;
+    }
+
+    .whats-included img {
+      display: block;
+      width: 100%;
+      height: auto;
+      border-radius: 14px;
+      border: 1px solid rgba(0,0,0,0.06);
+      box-shadow: 0 8px 32px rgba(102,0,255,0.08);
+    }
+
+    .shipping-flags {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px 14px;
+      margin-top: 12px;
+      font-size: 1.5rem;
+      line-height: 1;
+    }
+
+    .faq-note {
+      margin-top: 10px;
+      padding: 8px 12px;
+      background: rgba(130,100,220,0.07);
+      border-radius: 8px;
+      font-size: 0.88rem;
+      line-height: 1.65;
+      color: var(--text-light);
+      border-left: 2px solid var(--purple);
+    }
+
+    /* color swatches */
+    .color-grid { display: flex; flex-direction: column; gap: 10px; margin: 12px 0 8px; }
+    .color-row { display: flex; align-items: center; gap: 10px; font-size: 1rem; color: var(--text-light); }
+    .color-dot {
+      width: 18px; height: 18px; border-radius: 50%; flex-shrink: 0;
+      border: 1px solid rgba(0,0,0,0.1);
+    }
+
+    /* material sections */
+    .material-section { margin-bottom: 10px; }
+    .material-label {
+      font-size: 0.68rem; letter-spacing: 0.14em; text-transform: uppercase;
+      color: var(--purple); font-weight: 600; margin-bottom: 3px;
+    }
+    .material-items { font-size: 1rem; color: var(--text-light); line-height: 1.75; }
+
+    /* power option cards */
+    .power-cards { display: flex; flex-direction: column; gap: 10px; margin-top: 8px; }
+    .power-card {
+      background: rgba(0,0,0,0.03);
+      border-radius: 10px;
+      padding: 12px 14px;
+      border-left: 3px solid var(--purple);
+    }
+    .power-card-title { font-size: 0.95rem; font-weight: 600; color: var(--text); margin-bottom: 6px; }
+    .power-card-items { font-size: 0.95rem; color: var(--text-light); line-height: 1.65; }
+    .power-card-meta { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
+    .pro-tag, .con-tag {
+      font-size: 0.7rem; padding: 2px 9px; border-radius: 20px; font-weight: 500; line-height: 1.8;
+    }
+    .pro-tag { background: rgba(80,180,100,0.13); color: #2e7d46; }
+    .con-tag { background: rgba(210,80,80,0.10); color: #b04040; }
+
+    /* numbered config steps */
+    .step-intro { font-size: 1.02rem; color: var(--text-light); margin-bottom: 10px; }
+
+    .creator-bio {
+      font-size: 0.95rem;
+      line-height: 1.82;
+      color: var(--text-light);
+      margin-bottom: 16px;
+    }
+
+    .creator-bio a {
+      color: var(--purple);
+      font-weight: 500;
+      text-decoration: none;
+    }
+
+    .creator-bio a:hover { text-decoration: underline; }
+
+    .recognition-list {
+      margin-top: 28px;
+      padding: 20px 22px;
+      background: white;
+      border: 1px solid rgba(102,0,255,0.12);
+      border-radius: 16px;
+      box-shadow: 0 4px 24px rgba(102,0,255,0.06);
+    }
+
+    .recognition-list .section-label { margin-bottom: 14px; }
+
+    .recognition-list ul {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+
+    .recognition-list li {
+      font-size: 0.92rem;
+      line-height: 1.65;
+      color: var(--text-light);
+      padding: 8px 0 8px 28px;
+      position: relative;
+      border-bottom: 1px solid rgba(0,0,0,0.05);
+    }
+
+    .recognition-list li:last-child { border-bottom: none; }
+
+    .recognition-list li::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 14px;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--purple);
+      opacity: 0.85;
+    }
+
+    .recognition-list a {
+      color: var(--purple);
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    .recognition-list a:hover { text-decoration: underline; }
+
+    .recognition-list--achievements {
+      margin-top: 0;
+      align-self: stretch;
+      opacity: 0;
+      transform: translateY(16px);
+    }
+
+    .recognition-list--achievements.visible {
+      animation: fadeUp 0.5s ease forwards;
+    }
+
+    /* ── Footer ── */
+    footer {
+      position: relative;
+      z-index: 10;
+      padding: 40px 48px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-top: 1px solid rgba(0,0,0,0.06);
+    }
+
+    footer .logo { font-size: 1.3rem; }
+
+    footer p {
+      font-size: 0.8rem;
+      color: var(--text-light);
+    }
+
+    /* ── Keyframes ── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50%       { opacity: 0.5; transform: scale(0.85); }
+    }
+
+    @media (max-width: 720px) {
+      nav { padding: 20px 24px; }
+      .creator-inner { grid-template-columns: 1fr; gap: 40px; }
+      footer { flex-direction: column; gap: 12px; text-align: center; }
+
+      /* Shader preview: square box + tighter padding so mask center matches canvas (no desktop changes above) */
+      .shader-preview { padding: 36px 16px 28px; }
+      #shader-container {
+        height: auto;
+        aspect-ratio: 1;
+        max-width: min(100%, 92vw);
+        --grain-opacity: 0.4; /* subtler grain on phone */
+      }
+    }
+  </style>
+</head>
+<body>
+
+<canvas id="bg-canvas"></canvas>
+
+<nav>
+  <a href="/" class="logo">clue.</a>
+  <a href="/products" class="shop-btn">products</a>
+</nav>
+
+<!-- Hero -->
+<section class="hero">
+  <div class="hero-tag">about clue.</div>
+  <h1>light as a <span>living</span><br />canvas</h1>
+  <p class="hero-desc">
+    <span class="hero-desc__stanza">clue. is a series of light objects powered by a generative&nbsp;image&nbsp;algorithm.</span>
+    <span class="hero-desc__stanza">every frame is computed live — no two moments are ever&nbsp;the&nbsp;same.</span>
+  </p>
+</section>
+
+<div class="divider"></div>
+
+<!-- Story -->
+<section class="story">
+  <div class="story-inner">
+    <div class="section-label">the idea</div>
+    <h2>every glance, a new composition</h2>
+    <p>
+      clue. is not a static lamp. the animation embedded in each object is
+      <strong>fully generative</strong> — driven by an algorithm that computes
+      each frame independently, producing an organic, color-radiating visualization
+      that is almost unique at every moment.
+    </p>
+    <p>
+      the circular gradient form of the animation was inspired by the work of
+      <strong>Wojciech Fangor</strong>, a 20th-century Polish artist known for his
+      hypnotic, concentric color fields. clue. borrows that visual structure —
+      the palette and movement are entirely its own.
+    </p>
+    <div class="inspiration-pill">
+      <span class="dot"></span>
+      inspired by Wojciech Fangor — Polish op-art pioneer
+    </div>
+  </div>
+</section>
+
+<!-- Shader Preview -->
+<section class="shader-preview">
+  <div id="shader-container"></div>
+  <p class="art-caption">the actual generative animation</p>
+  <div class="speed-control">
+    <label for="speed-slider">speed</label>
+    <input type="range" id="speed-slider" min="1" max="200" value="100" step="1" aria-label="Animation speed" />
+    <span id="speed-label">10×</span>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- Creator -->
+<section class="creator">
+  <div class="creator-inner">
+    <div class="creator-left">
+      <div class="section-label" style="margin-bottom:16px;">the maker</div>
+      <div class="creator-identity">
+        <img class="creator-photo" src="data:image/webp;base64,UklGRtgkAABXRUJQVlA4IMwkAACw1QCdASpoAWgBPqVQn0qjIiEpI7GaESYUielsYTpJe8Tffbrfl5+r/v8XJLy5D+PQaLBfPr3FfAiJc9GrhfXxirLiMJreSp5QPrP+d4N/sH7Lyl/+HN/8vupv+7xp/n+OMjFejSyP/DrefaFAfoh/i+ip/+PCA/9o6kbA23ypHcLZC8dkOdMomESWG1nhfG6lNF6qa+uQUImFGwNn0TxJw8U2r2MR/LImM9ef3HvoNsebtOjR75HfXKbrFXXsfVC4Z6Sla0akkHojeGuZxNdiHZLAfeZoQOjIU9Wvunlt9UZLvUG3N8IXyb6ibh8m98sr0uf4pgbV3+i9DuSNQcYSAD9InUTo3vuwyfBr2H9/8ikUeWVgFwoQ3fNHScW/ynoioPf0JJW7UldqyOxNMZNew2NXvbPeCtQd5TJqCg8POV3ri9uQajZDxidr3xB/cv83mEvVeqGp26uVDFrgnp6/kA/c2xVNBAzcF0R99FQgHlhM/nKO7QYgxaxnm7A0M9HIbSzVScr8F3dbVRlUzB8T8Y9lyVmtFODZg0uIh9l8hRAfeuelzSB3dGW+7Gqh60K0OpOLZUKh3X/OWuzEX4hgqBLN/Fe7RdtY4JzxxdVC6waK1rQoBkjV8/E/QXWsqz1AXkKSEQ2uPFkihS/fsuA0czGLM+/4vxOt+1UOUW29gKXlPuYoqa5yXDj2OQSqqGezqp6B9/VhsHvdvQZrxOnrstgR6LMfd2yMF2jSeAov+h5IQliVfcJDBR9iPwqUPflfe8bq3KooDbdQ4rAWA53wRn48woWvkerENpC7Kz4cRBULb3C5Gld9HnPRqkLwx+gzyqqJtazx9Bw/tBZeJmyXwHbUr9efW+W/adUmPiDmTMjk475tsN+98Fm4+zA0Xqcjro/S++qdBUjMVjrnUhfUjpfJrs5iJE+lGsuY4rQjmK+T0JhxVKct6TgSoq140SJdRnsE2R40mzXSftfY23Pq6rGDR76NhWkWhsMg1D8P8a5w7oS5/BbRK8ZsHtzdJ9cbF1NAFD9NQ1/m4AwdWAWK+eZkwWdxhWbEaVOORegD6h419JvsONa686IDrtVZy7uR2IGSmhfBMK31DCb36D1YvNs8Ff3lW642+lPuCyXSwO97ok7VwNSRRIwyCJE9FTOYc1qEA0OT6oQH/GPoBJKlKXhhaKPWpKmMJsnhk++aYnh+8TeW5gBcjNTUFX3IOwOHzRJnbyGLtP2dkWcX8+qzFEq3Un+4WSViHHFtP4xwVfX3FrzO6IYd/7PyOkiPhUrIP/sbUw5kUGNjKxV99uwoOA+DSI2YTJ8uz+x8+fqPDDSo1AIj/qVh69C/MBQDyaDdF+G3KBR+6ml4E5taHZQ+pK1wQfSReM43zSKa76k9O6OYoADbJeViFtcJHLX8WkvApfm0cTnrEYu1RM/IWsx+A7v2T5qPtAdpoGHYhDmtXEvUyyGBBJIWzvs6Um2IjuPfQSdH+z45GNaiSAhjchXqqj1CPbYwNbwjnuNa12LAuCbFra/dCumxjLd876TlxpVoe10EWJss/2FzOvDd2wd9mkyx/BIOobNKBpqzWIxQKBLP0+lLMh8RZ7csEuBrl+Nbw6qkvGDBsSaR/Q/59enQ3ZpFaaOeB/+YmXttacjqRiWhm0iSdr2urzFtc8i+6RIwnMVpqctB6CjnTiZZAf1RcyBEnCZhizsiQCrUlq5ZwnYDDmJE/G4IGm7kyQJz4AD7GKWQMpUdRSyxwmM0xFE+SI9TEFK1Lmvd7yp0zKu4AKdH00mP5ftJxfiwmjadxWoArw31RANk1SofNk3md/wyZXtBV6zoFELsFtNI38HrVK5eazcnb/ALbinYSM3FdCvElzfwxT75/u8ka/AK5/LuBTFLaSFIvi/LOezwu5vV82Ysy2hvkIVhpc6NsTSIfBFC+pU3R4ypKAE8ggD+NTbrb5i1lldJ+FCnZImfN4IgvzoC//yFeyXLjiBbY/dc0QE9SenUlVaZn5DkoQP8BIM5Rrwyo2fpxMdSSUf7kBuzin02t1aHDwQwgTZZySM74EALatN50JU//4ZFa6B+/F6jryyIM3uDBqH5qmssuNZIVBULitbRNrL0dj8NYOngJr0372Mq4ijIendHcVV5ntcKm+wGtSlT+CY3DzDGNSaqNIivDX0J8/VZlhzj9GG9Po3KbrVn6pZfuKINdEfyez32LdRT9UsVqWUUU5X3Or497PDW9SAYbMJKUoh9pv6MvJl/CVPw4W2tP+/y75Ac2yJ5tL1tbUxApnkrOg32xB3jBpiOZjhoAAD+8TmO2g6fEb7aLRcJJeKHES97jeQ3+xa9ezldGWXOSeA2tKPIL13Bf01bPBmQJcuWuQ6XFm5dH+KzcoKyA+sKrF9Lkj8HPm7LUolVDwowYuKUWnKm1Bwu05I5WSa3zH0OUd9O8ZkDZlBAr688jPCUYpjLHCtPoVxwpv8c1xjS6nDqOHxNhkZSPLZiGQpILeLMi4iET/mw1d8X9ITs1C4byCSP8Aypl1OUk/I26Ox+LfIUbFGme4Bzben3RPkZLlyQZqYHk5f8Z1jImyJmhZ5NS4bbTLxZW8n7/ap4tb41V2LxiK3qVoVASvjZIGCo5zK8ycc3LWgwNN3fV4CnAiZAUSXBVWfbisukbwB3PB6Pgx48BahMMIz4PPbGL3LqxMfDOMnO+JkEHxYaCun3UIWXkcLsVblHfpVZDp7ex99xOMiJy3Cs/nDrSJbpcpViGYHIx6X07nFVCIeeqEKLEYXztAcjsegTRZgxMUZeVmdeXDfYaBOWuue2ZTzV8sincgNzqPjFkQQtOoqTGrjsVANxR3yDcPSt8fDPqelHsyafb8ANbYi7dGW4VzBR2gVQW65Y2U6qPXYOO1BcwVlZwb5dKcDYVPufFyIh4LrupSJbCakH3aHMxy51NoQY2z/P9DrCyInUzpysGkX3spoILfUZJYHgYJbxlgwa8y4ITq8Qvsdk2iEU8DfvjQmF5g9px3wEJMukp6WkT9Ii/9oeIDcFDPYCTmZgkjqtV76WxHkyZ8fhzU8Gki7f2EoA1ffod000Jxnp/K4JF346SWRYEN7ReYcDNE58uKH4tCvMrf9KhpSyvdMSFo1qo4+bEazwTMCAL5nSvkuxHJCQhEf2Uh7hrdbuoOVNT3ZOEvrHJvLSn6I0kZVAlLKRWA3PnGOXNRDofivvO1XfHmv9qCWSgQTJp3Npp9bKAZrIU0cvXZF51TSh0Jsl/sfpDGhVwtz5n6+zIpEJ59CpC/XqLkqdxLpOLs/4nvvnKxZyvdrkO/D9F8XdoyLS+26+oY5JyeGlKS3XYF67UOrJKvmX5B8VXi7ijeJJ+iwiyJRMLPzN8Wld1uNbEC3Hug7sIZN3gkxLkmT83nJ/awDt0dzjt8LaTC7YGlxT2e5YFp1g91XZvUr17GntjBSvFMZfLyMUrcZXrUP0WvyhNOaAQEFehI3wD3eb7EGa5E6ReX4xO9tkKgJbiVaQdL+xZ+9eCMnImcLZiRNSmHMYZNiTXb7YMKsu+WQPhCIOqlESIInEEvoBTZSkZ1gewbuts9svMN/Q6KoZ3idPDmRyH3/PI8py7PxLwQkBrLXhVS95PPfLXpIUQTfiEjSynm3Hjo7EjdFd9ltzLD3e4KoVGiCCkscW+Jwsghqwojki5RiOtTH+snpRdnAqUFvQq3D46UmvB4xwdGSW83Op2Gfg/dLtJbuqNkD3+jjTWx8Ub4KR0389E58KGvA8UJSsp7aPClITUv5i51lAx+H0mUPQETMgT/PAk2g71sL4IRpbwi1wrR2IGFAxc2HBEwVBmYNmdtJZJGZZuCSgWJ5Q6HmSekDgB/rcSskrjaPfpo7Tp/2GifnfkYHA/aZAAKXu0Altt/U7zc/D0IuTyYaGw1nkbbi1XETMokbqicY3cINmA6s2FvVvYRojE+xsRUPHv7U6aRSglbYuZm0peojHoaompPxyh4ALLq+wG9sK0/jsfktL7OpNsFJ7YFqxJiHiuVJ943Ux/JwXGXIhygYbhpOeQXqvsoXAws4aJg/fgfNgM0L+LxSQBIFpzi0Vx2KqxLVLvj28oHJOfMQA9WVun6V5e9fRagYU4kMnAsEN08zlGBoJoAEeccJ10xgjn8MRVKmUZ0dmHiuZjwPwqUmHuUTx5KYgO+uIuYPFwkFBjcyt6W9Z3+Ij3n8qh3Z86NGVIJ8aj2h9HUT/E9vTuvnBtSCkseN3v+18mBOGJagjLSPlfitFs8+EV5jRh2vQURr6rC0RWci4Q9xkz4AF+aGqy5RVF7IdRXH2qXVtoXpzlKqcMc4OlfebkrOdC+DnV2Gy4CurozCEdw932DLuNJ9jn6bFA3AmDxxFaOJZfJ8kt7SkFpdR7zknuVNUtKAtgNFHYj1Spg7F6HGU7En56vWerOD2TdIPSiF0pDit7WPGXyma9Qb47o3Tq81QUBieZFw+a4v2cSpqnBvZzdsUEVTXc1T7ZPTS0JCQ+wrSE8WyewjDNdqsYTPaPp1oYr1/2FfseEb88nTzswdSHQZgw6Z6vJ0UGopKscNhvgCmBHLNMdx0XRDKevC9efrdlF24M89aOzHvGO//1yaRnricWESM0U9jqlVhXUviziF5liUw0D58hAzB2alPkxOyOJkBe7FgMEkgzJjnauxErNwEUZgqUOD3E+0+ElHY4Zt6QkLvXszsMVzQ4xBbMC/TqxfNh9ZauxIFZ0xsAS+qF/KwjYRTEyKnySGkoG0M0Z5KlrJazoiC0kPKBvWSiGPbidUAsDTkZ0SiS/vB/QL29bafCi9rhI3ktRQ8AGgVjLChz+JSkik4TBAKV/MTKSeHU4CNafHpfuZZKCBzP8M1WDHEc8kYxM77h5Qr5k0i8D72aF4cDkOESKjYiobklqPjdU6DEcvA1LgEMjhSYVWuIEBYZGdZRaajJi7zDAQGOR7TiCVFwT4gm4s1Kx5cIHMt5eOZpP+Yw8GMZELQCdKcWK7H4PH60Ed3RvcHGp4PWZi9t4f64pecwiI6/8gIY+1YMVkPdmZMKQAblMXzE+/OcEruJ/GaHPefUmxip7uSiOIQfmdqEI4KfyhDZEZisVoXc0gP8AW5Ddn1q4/dxrTjpN4OIm5nQE0A9yMfu8myPrMjzF9Ldo4HAycrKt8hbbWCBqwEJgfLS98QWkZSlF7YBgLTEqpSwYPnge3igCglDM35Hk1CKjm+yGPhH+zzwx0QmhUhggsYR3uAW5UM07G+iw9dhmTdIb1uRBxvJWTbqCr+NPKy+jhts5OxxtkSLbb1JEBYzpZOuelgHveuRzL0Z9GgGogj+qqPwVx7oBVwwT2/KmdywsLA20/Dx1Kn8LriDEuZ8nWIiD9GFVZj18jqjdIM2p7uuLi/8jkTd9OHU/6oENurIlJ9EIp1btqtyEajZEps6pcQbHa2lEK/4K6UIG5JlN+aDNen+ru0Eu1U24jnMEG26m8lw+R9zDGZ5I+tEDdQCj9ND0BpHS6qi9qK2x2go9ztclpDcdZMzP/pC1juEw5GQ0s0JHIQ5CY4kJ/FWURhIow1yRqLaqZAkNBmJWHPVexWTV5we546SvFazgi0cVRtCZ+slFcOdMVJxLkPvugVE47kF4PNkP7qBEQwTHMvDRflD5glKl04klhVynDJJ+CQrvABEEizEN25bwBVGsK/vu5mctaJUeCtfWcgAMELdXx3CSGd3+iOZKEF3J7VOb8VXciJtP832EPoO+TCyOkd8dkLCuE3eInDossmh52lelJN9SOHgKMTUex8k3UXLt5FJuw/tuTjZZegupDliEg16drP6g7bxr3+ZzrQxqByvQzT57bdT3NB1JHSFW7tkXZUiuDm9gnAt1j/mJu7JoPCle7XOGt+JyP6o34wY8RDbc6qhjaug6lF8af1KfuwPK0Yhv5glBseLjHkuCYvaISQtokkjIhEte/gItJHyauWyIXkftJ8jNMo7YE4hLYTv5eSzIxUDPhTdyfLMiTmc/7ka9PmNXx1aw4rO7rf8aNLuBhhBMzYTDrgaYRc+WI3v1rSei7yIgXQeB0Y597DmeboaoKGICihutvhzMklIt4xL5lBgeGh9gqOPkLp0uDml2nBCDbIxerGCnkHbevjxXRENFiKzuI6gTO+Ug0bUCLR8wfEq0Shtm6A4TPs+6BrHtMUdZkABiAfJjKR5airDly61DYCVDWYufszg32qWyIsIqlpDxyx43LVgs8cpKOTWy26H0HPQs2iMAXftqwsC3GjD2PzSFOw+Od1eqD4DkBHvlJ5EPYiYYjKfGqANBoZK1Wzw+dZXrwZ7aj1KxXyVGcd6CBOgiMf2HN3Z02G2mBqfub7ut7HUqoKJ0zLtZYssM6LPtHRZ4Ypr3fpv73nP3SV348VO/tb6h/D+uvW3wwyaQ9QRDyfg0cN2ajCVp3C/oUKmRh8SfSTnsPPDfivUmnLAbQOZoGM0oo/uSOB0mvU9viJ5wNbyjQ2MPk0j754W9v8BUV5L701KKYVmJK9wCnbgFmAEX2V0ToVHo6PtErLu/4zCF3Zwi24dK/zC1HA8T9IwprV+1IRJVGXK0dKDiq9ZpGSc32NPqfGvrcYBKv9Nasc3ElbTQR5gNycZC3pqfVIpXc/cRPxyNLoAG7hGR+1QX3CTOWa4z20JxfLS+Y4BRo2IQ1P7W1J8FjA6yihZOCbabcKyT9kejCyuSzmD7T3rCT0y3hYJR3kfOVPGBkJ6WDPdN8805Z+OOq9IC3fA/wBuZqGuadRoBlGY0rM5Z6F1SWQe58E/nFxRUZiP5B3cDYsRkWqil18bs76faSHBFpdo5UnIDxXBZyCblCkmZbbz4bASQnD5OR8oAck3JoeGZoNL0u/FiArwWpSOzi7pLkk/oH6r/VtZT6mpUqsbjlUGdLKjTQzjdEYcFnE8iK656EpGO6U69hElZrM6WxS2vg5y9gsvJytU8UQ+yTCInK764NPuJQ7jSksU9pigKntTqnsl/EisUsi31Yd54xAtgOLC2moDrURW9oqpixsCyha6MmPMqTDnL7vR/wZXN2v5fdmD/zZx3Y5JwWt2UO5oskN7HqGtpOkFD6urXozcoWUSJD8EGGlgoChEdelEeIyqXTjwQHNM9lr0Q9EXKPCOzrH+6n5000xt7/w9vTsoDzmZjwf8kcorjfXpiIwbn/2wJ33w1ZeuXueF3uovShOpDKOtM5GkUCZXbYxXYYZW5tUzAXTe8zySPUjpYsF77PflWa07pldnxW6xm6Jk/rZlJeE+0WRsMnHM1qK9EG/Qo2Dh/jML2NXEvBonm2d48CPo1XKQVvA/rMqMkOjFFi8N/5SgBIqsWIU5R2wQyN9zy0aHXdzKV90C+qWwa20kob3pQyR9XCovFF53MYuey6zOACGlZEBuNw1BHx9OLaBOgHzfcdGSjoyuF8bsqIaOJ+DYyj3xKmwxJ4ZwvZHIQm8vyr6XrBmo2haXW0gN5A3HI+aQRD6YkFRL14v+7bsQjbiKdWDpGrTzkYigAb3AVDJPsn3PvKrEIb+/4a65izT1gMQ//uZmlkPlrVLynsJXuOFRDKbCUbix5UDyZoSC7fD6fsOTkdGFF2FserPOuGePHkS+inWhl/fN77ccHiGYz8f/Cb2VGpfCGryULihr+P0qNT5V3ND2mrCzV0x5KG6FmP/nJaMQQEEgO9t79rl1w206mJPPLR6r6jXY1jELso1KcfkqvFmmo8lK4AVWRUpIW7kra4bkVlkNDuxJU7yzAr5IoRlgLGzNdlbiJnTOvkasAYVALgylhWoKC+78MikIkt7IT+X6IZYrcBeS2rqZCEp33Luflxc0YsxEcnRwLR6q1n6dPoBNImdDQFaD9UILUfwRuA4Q17ET4SAl2RJYi0//qd7FQ5x6Oion8ZKvcWNxUEUAVoyi4hbIGo9Vyg3V14lwoGeXG4JamqrKzDMAedGOHKxU/Gkdb7ffrWoGxsQki8X3qExr8tHf7ZthpkZfRFAidFuW1Z7UEMLlMnGmwZlQ/RGvL1/MGBel5kdPr2nGxUsDRhMbz6xj1er5U++UCasXcKJDiRETU+qrN3pnRv4oM/B8rE4BPMYES9Wk42jkr/A8j7NB7l/r2pzDrfjhJjkqEF61kOAP67zzOmEipkJ3zhOj76arqNIul688G6hz0p34wMQPYsbFkGg1/IAAiUmrxFej5EJQupzrcvv2NnFS2tEQaJx450R7ELBLDdEzvhgMWttSK5BBlz7HBorGQPd+IKU/J666Rpg4ewfpTBke+0GcqKKIEK3nI/yoiNzST5EiBfKxgDfX76LjfdGZwpoLozpHh+Yb7yGGsuH4QCqmuyA067K7ZYjBnFoYaIp/wTOq1NcXb6ImtFAPk5ysgkX3AGojnYmv3kq9Qlg4Q/0V5P03bs6Nhk+Ii/i3UX9NYbmWYgaVMtTvRYo1PANX8kO/lwDexqeuqD5MWPNjaTMUtyp46yWCkqagzosC07cS2UbPPkgl/sNQTQxgYl0LBZZmDvrKb/OR+H6hm0V4QcMsk5zkMcOe+9YrPAo2yoHtEI+tceH8LsayO+5DMxviCUpEawGhUN4iS09GWoKzfv1tCxPBn4a73phEPNuM8tQYu6nG+NRXkYX0NNnHTQ/QeN9pI/SmHz73EtHjP8qiZQe4W/qWmp8UW939HuAAWhcBQkyQCCV+H23gK/HP6DfSxyfvDuGeawOMtBu9/gRpLB5TVtF1Wdz+IBablb88V3CU/rdQSm7RJ4BL65jxMrohXD2zknRvVLU1WOc802/3UXraCj0jQwQNRI9qLB58enxdlJmo6/xhSKA/PdZFZD8z9hNqLfxz7yKkTCmL/uvyxFmiS6+rYJmLa59FZb2cvw0Et2Pt1QK3KdnZ5WUW1iWsWRYcYEGoqyz58oIFGNnGOZh/2R5xPCUeYnLRoclBPtgnMVHD0Qe+x3nVmxtwCkIWkKijsOpxQ9yVQ5ugJD+ENuXY408PhhgNjw2LskVgI70jLolkKTtSLxj0HxLLdbaSSVN60O/RBKmYi3fIJ8bPvGmGzrp4Bsl0sq746xSgcJqueKL/C1wWLsu/Z1zDEJwJF6lenSFmuP3I421qtUcArS4WlLxCX+dF+mD6qI7AmNWHrute02jSvzXKM9ZcHx47KKpO4LU1zFlemwli8qyx1mBAylN9jjT12zLLSl0Hl79tfprabWxrrNTtEz/VfliVLIiBwLuIJfmlf0aZNaC2wksmtxsRaEjAbmXYDqhOc8gIR+qrn0KapNKyN6LK2wIKhV/6EPdary7FI1JTFDNJAEWaWRUhqtcPZ8vK0gnbm9ZRxIFCXbWKZSVvR1uVcLwfzfvQyR4EZtvLp2zO+iylBKk+s5xpKuFEvJE8Agzs2lKDXhsPX3Qx8g2dymHEGDyOLMVkWUCTK0/wBcMxZ2l2rkZXPDQYu8o9lpRlxbw113ARBgDduOnGI/Rp2G2izPO5o7KGKrSIYN9TpypTMxS1ZSV6c2BLxzNGz2O6dl3HV5nNR7pF9elurJnsBADh841x2cQOAGTRyFhzRqB+AIItXbA9Wptnoq3y5JY3WFzsf/x9qYzBgg6iVrQJXM0z0QAQVnVvUoc5gsdmmniu8UJuJtvlGUPOdOKsZj+of9aVb6JYEaGRXSObaDmnoVChxvY8SPpeCIH0ai/w0LTkwCDQK6d0hPzZXC93pUqXMiGEA3Rhq6GisTsxzAHfntip/rfycpFBr6Vj0/Cdw6iJporKmnJRz1gSQtU6cu0NoZ/pbubpMLNUJlWyrNgZIfj+LKyXe9G42jQpOOQmwvFiz9Kc+D+lOvnPZgYeJTl9zfTLHY38dRrp1L8XRIMPwhyH7RSBOj2EHrg5qZwGHWnYx6sQmLB4gndmJ79hAh6mSrhpSmIQiqjAOYEEkNB0WJ5ZhS8j4KkWUkaHqN9C8IM+1VcrH//wuNfl0/uK6IpZUgul3VbOZTWDx5ufxV07cBxuJyv46XrJdmgl/aeTuAWfsZUnXVvXHUjiGk966+uz/ca7hkeUwVbtKGrBl8MaDIcV634c8XR6oGSCFjvrD9qIm5Hm3PWI61h71SzmNIDGn0XXZeFiE+U9JYoeg8IoH3NmEEvabafWiTsc8CQAjctHui1cCx0qcMKyhvZ0gaCfDi6el9RBYjb4bYsfeH4QypM6UbLUcgUK27CuEisN53gYWjzNqEiS/Wj49oyhIZnRjeDkSwsk9EYyPdDSUVTxi4mXHl/fhl26jwWJMZnSVMp34yKHnuLNR0tIi3LPwIJOTiXyJR4vjsA6BSAC+QbhcYtqtPG5H3HlJUIaueOHQlrtCx7yVQXDhxNA6gkcyfgFZztcUh0+3/Bys+HedlGCmeTegLcaRb2aHF857ETeXt1bQl6SoB7JeXCv0OUvaVM8tGIQkFbqihfxZ+O8fClbY1pfM6T3uDcoyqn9F9yTFh/4N/LfLFPEaIAFQ0EV5srpsTFoFLFG7BsdN2uvSG0blTv//TODc2jvCbmkQbYWkRsrJpiegu+Z2DWvkgK7g4LeJ9WQXVDh0fqrwOg/fFjGrb35vJgxaotO9y2UbHMqXUFqzviIFU6W7+9A+J9WpT21LCdH+ExWeoo5g12U1dCmbendh3ODAOoJuU6M2vcmLkvvk0EW9Frz1XeUQ/zyqrTg4MKTgXOzYo+aQprrxpK8nK8NdNBbifPkT7M7ScnsYB584jgkHU4yxCBCpuu7L0bBWXSYMU5wQGGJqw6hMuD8qrKzeNq99YsWqWqhiBAp5mRFKBZV30vAd66lCPQZRGNAFXX+enZRh9k5fdblPKmhS1LMfHOoTtCJAQ7RXUGcryNX0ZSfM9pbsRVMpClDj1o7eQLmt1spqaYZN3ft9ZQL/z5KvYDr3MJyR9lx1GC8zrWxwuFeRVON6lNp5D/dHq8HKG0IL4Q4VUSbpplbej7GPhMep1cmhchK+AUbTCUBojduWMsD9s6MwYSJBIGMEVR9/Uw00hb1QNnQqC9mnHzddIX4yh6Tf87Bdt6GrbYGbZdAygmxFArtZHRR76IPFYH+pD8rZOqjEclFur6asRSI0wa/s87GLIDUdz8SL7bSkEEMK7k4khj5mOZpYdLLEzQGvbsvaGZeRkyYILHVahGWMOT23pjRvSJpTwm1vsJzUlOWmHaYa67LKj9i98+QmahB8o0Li4aHs9pYF6FKi95OvIMz58A5bA+rRYFN6+JR2BlfHlU9ybcPq+iRYNY9zG1lYckeUD+adBS2rJHuzBkNv8Zq8V6e5wCql2xz+Jcg1+No2bcBMIhN3q20AYRQEJZ8dO5q4VXzuqdacyqC6qrbz6S/lSi52Y2rgW4Ulxdc3NLr4xMNUQCtpT0+kSAdiyHh78ZxKzma2K/lobF5ls5RYrPJHS9F75hDPAztn0F3B5ucVckbq+KPZYzUIVsdmFRHr9IVBWCFbVEOhay7Q1N8YWpvvCccel1+bC1qKZXpF+f8CmnwW6UTrpyJyFtUJ1ebpXwLqsZfEfrzdOYirw9bnTf7gX0UnkctVFlzF5HtCxcAuGGYp4+6C7Ckx4pckGOk0F+o7ottzOkJtwsMIZTZu7GtsgesgxqraP/KIN/6hzlB+0ke8NIoUvcAL56xz7gMHU2vWBWK5GWFzFYy9ePzRcA5gIhGqpzFPIdQSr8cG/ukry+RWCFo+8KAIJRv/PHTSJY8J7NBQBVoyIjVy+BL6dTBockupFpfxatdYLTkHkFTkxQJowQd6/sK9WzDQCtcOp9iYyo/F8MFAy5/Oi/hMivb4VJUuW2Xv1EDkBICU3VD54x6AmhMipSH4J5W7762eeZE4+R/cZNnhFlputeLBC3nL9W6WdMAQ8Va+t7N+J9IKKmJL3e0Vw8hVX3B3un9ARBHYiMTZYN0UVVW2SNBzx2Z1ZPZsB2RfBRvkJdHxM6e019jvqZrOcQUx40Z9iKeo6f39eIM6sVx8ZFlk2PZk0S7fg1e2Ui8FMAxlLYIDr6hM+jUqJGAYWRgMugFULxWj7VQRZ9JGW+W01vxHY2KD9OMNRHAL1g0mQUgeMnLnqQNtsAQY75lvus6aJf6eHpVb8YrA3/HEFTAAALAQJe9qOwG4ZZAMVjSWte/qN+hghWBUomkhXFkemMatmvcajLnb8FYZBcQ3bs8n5pbJDWk2DyZupYAxHsg664JsjETrcKzglr2wwAaLtg64D1vzMB0riZBHBuYFd6kj18uWdkuq/L/5VJSNn+rQTB1OCRjcZDMaWu8TdhY2fj2TqcYm8j90gSn5DOtOujXY2CKCq2ov5wAwD8gAXj4axffQtIN64nAT5YAAABcTVI+DwIHaoAGacBs4KfVubSvPAbCJtqfCL+avdBJLCzdCfbgSxEBYb1M722/lbbSZQwK0edba0EYkTybxuCjdLHCrXQfOyooYV0I0wSq7VCMJWOrUkEyG8pIMij7eAjNgAt+HWhU03QpYsLuCZ426v6jdocGxStkKRwbjpsJyPGqldZ8FY7hO0SA90YEfzkZVH6FNEsIs82LbedKkecnpS2k4cpxgGv8E3hJRtgXIEJeVyoeChx+gABdwJjmiQY495YbkjgUqKRUcwR3zaQfhi4QHDwAAA=" alt="Jakub Kirklewski" />
+        <div>
+          <h2>Jakub Kirklewski</h2>
+          <span class="creator-handle">elektrojakub</span>
+        </div>
+      </div>
+      <p class="creator-bio">
+        born in 1994, he works as an engineer focused on lighting installations. trained in electronics and telecommunications engineering and as a sound-production technician. at the meeting point of technology and art, he builds interactive installations that use camera feeds and motion sensors to drive generative imagery.
+      </p>
+      <p class="creator-bio">
+        creator of the clue. series of light objects (<a href="https://www.instagram.com/clue.lamp/" target="_blank" rel="noopener noreferrer">@clue.lamp</a>). together with Ksawery Kirklewski (<a href="https://www.instagram.com/ksawerykomputery/" target="_blank" rel="noopener noreferrer">@ksawerykomputery</a>), he co-created FLUX (Miami Art Week 2022, Signal Festival Prague 2023, Vilnius Light Festival 2024), ENTER (NXT Museum Amsterdam, Khroma New Media Museum Berlin), and LOTUS (salon opening during Paris Fashion Week 2023).
+      </p>
+      <p>
+        clue. is a solo project — from the first sketched idea to the final
+        shipped object. every part of it was designed, coded, prototyped,
+        and iterated by hand.
+      </p>
+      <br />
+      <p>
+        five different display and control systems were built and tested before
+        the right one was found. the 3d-printed enclosures were learned from
+        scratch. the animation algorithm was written from the ground up.
+        the costs were refined until the whole thing made sense.
+      </p>
+    </div>
+
+    <div class="achievements" id="achievements">
+      <div class="achievement-card">
+        <div class="ach-icon"><svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l4-1.5 8-8-2.5-2.5-8 8L3 17z"/><path d="M12.5 5.5l2.5 2.5"/><line x1="3" y1="17" x2="5" y2="15"/></svg></div>
+        <div class="ach-text">
+          <strong>design</strong>
+          <span>concept, form, and final physical object</span>
+        </div>
+      </div>
+      <div class="achievement-card">
+        <div class="ach-icon"><svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2L18 6L10 10L2 6L10 2z"/><path d="M2 10l8 4 8-4"/><path d="M2 14l8 4 8-4"/></svg></div>
+        <div class="ach-text">
+          <strong>3d print</strong>
+          <span>picked up fabrication from scratch to build the enclosures — no screws, no glue; everything can be replaced, disassembled, and recycled.</span>
+        </div>
+      </div>
+      <div class="achievement-card">
+        <div class="ach-icon"><svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><rect x="5" y="5" width="10" height="10" rx="1.5"/><line x1="5" y1="8" x2="2" y2="8"/><line x1="5" y1="12" x2="2" y2="12"/><line x1="15" y1="8" x2="18" y2="8"/><line x1="15" y1="12" x2="18" y2="12"/><line x1="8" y1="5" x2="8" y2="2"/><line x1="12" y1="5" x2="12" y2="2"/><line x1="8" y1="15" x2="8" y2="18"/><line x1="12" y1="15" x2="12" y2="18"/></svg></div>
+        <div class="ach-text">
+          <strong>electronics</strong>
+          <span>custom built PCB smart boards driving the lamp</span>
+        </div>
+      </div>
+      <div class="achievement-card">
+        <div class="ach-icon"><svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="7 4 2 10 7 16"/><polyline points="13 4 18 10 13 16"/></svg></div>
+        <div class="ach-text">
+          <strong>code</strong>
+          <span>generative animation engine written from the ground up</span>
+        </div>
+      </div>
+      <div class="achievement-card">
+        <div class="ach-icon"><svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><line x1="7" y1="2" x2="13" y2="2"/><path d="M9 2v5L4 14a2 2 0 001.8 3h8.4A2 2 0 0016 14L11 7V2"/></svg></div>
+        <div class="ach-text">
+          <strong>testing</strong>
+          <span>iterated through 5 hardware and software stacks to find the right fit</span>
+        </div>
+      </div>
+      <div class="achievement-card">
+        <div class="ach-icon"><svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="10" r="3"/><path d="M10 1v2M10 17v2M1 10h2M17 10h2M3.5 3.5l1.4 1.4M15.1 15.1l1.4 1.4M3.5 16.5l1.4-1.4M15.1 4.9l1.4-1.4"/></svg></div>
+        <div class="ach-text">
+          <strong>process</strong>
+          <span>refined materials and costs until the economics made sense</span>
+        </div>
+      </div>
+
+      <div class="recognition-list recognition-list--achievements" aria-label="Clue recognition">
+        <div class="section-label">clue recognition</div>
+        <ul>
+          <li>Nomination — best debut, TRŁ (<a href="https://www.instagram.com/targirzeczyladnych/" target="_blank" rel="noopener noreferrer">@targirzeczyladnych</a>) · PL</li>
+          <li>Exhibited — Dobre rzeczy, ŁDF (<a href="https://www.instagram.com/lodzdesign/" target="_blank" rel="noopener noreferrer">@lodzdesign</a>) · November 2025 · PL</li>
+          <li>Exhibited — Paris, „crehange international” · FR</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- By the numbers -->
+<section class="numbers-section">
+  <div class="section-label">by the numbers</div>
+</section>
+<div class="stat-row">
+  <div class="stat">
+    <span class="stat-number">100+</span>
+    <span class="stat-label">delivered products</span>
+  </div>
+  <div class="stat">
+    <span class="stat-number">9+</span>
+    <span class="stat-label">countries</span>
+  </div>
+  <div class="stat">
+    <span class="stat-number">3</span>
+    <span class="stat-label">years of development</span>
+  </div>
+  <div class="stat">
+    <span class="stat-number">∞</span>
+    <span class="stat-label">unique frames</span>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- FAQ -->
+<section class="faq-section" id="faq">
+  <div class="faq-inner">
+    <h2 class="faq-page-title">frequently asked questions</h2>
+
+    <div class="faq-group">
+      <div class="faq-group-title">product</div>
+
+      <div class="faq-item">
+        <button type="button" class="faq-q">what comes with the lamp?<span class="faq-icon" aria-hidden="true">+</span></button>
+        <div class="faq-a">
+          <figure class="whats-included">
+            <img src="about-whats-included.png" alt="Contents of the clue. lamp box: lamp, cable, hanger, stand, and accessories" width="1600" height="900" loading="lazy" decoding="async" />
+          </figure>
+          <ul>
+            <li>powering set (USB-C cable and compatible adapter where applicable)</li>
+            <li>screw hanger — included in the box for wall mounting</li>
+            <li>3D printed stand — included in the box for shelf or desk</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button type="button" class="faq-q">what case colors are available?<span class="faq-icon" aria-hidden="true">+</span></button>
+        <div class="faq-a">
+          <div class="color-grid">
+            <div class="color-row"><span class="color-dot" style="background:#1a1a1a;"></span><span><strong>black</strong> — black in mass</span></div>
+            <div class="color-row"><span class="color-dot" style="background:#f0f0f0;"></span><span><strong>white</strong> — white in mass</span></div>
+            <div class="color-row"><span class="color-dot" style="background:linear-gradient(135deg,#ff9de2,#a8c0ff,#ffe08a);"></span><span><strong>gradient</strong> — coloured in mass</span></div>
+            <div class="color-row"><span class="color-dot" style="background:conic-gradient(#e74c3c,#f1c40f,#2ecc71,#3498db,#e74c3c);"></span><span><strong>RAL</strong> — painted in a color from the RAL palette</span></div>
+          </div>
+          <div class="faq-note">the lamp runs the same code — no matter which casing you choose.</div>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button type="button" class="faq-q">what is it made of?<span class="faq-icon" aria-hidden="true">+</span></button>
+        <div class="faq-a">
+          <div class="material-section">
+            <div class="material-label">casing</div>
+            <div class="material-items">3D printed PLA (bio-plastic made of starch)<br>glass diffuser</div>
+          </div>
+          <div class="material-section">
+            <div class="material-label">electronics</div>
+            <div class="material-items">4096-pixel LED screen<br>PCB driver board<br>cable connector · proximity switch</div>
+          </div>
+          <div class="faq-note">no screws, no glue — everything can be replaced, disassembled, and recycled.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="faq-group">
+      <div class="faq-group-title">purchase &amp; shipping</div>
+
+      <div class="faq-item">
+        <button type="button" class="faq-q">can you ship to my country?<span class="faq-icon" aria-hidden="true">+</span></button>
+        <div class="faq-a">
+          <p>we deliver internationally. shipping price is calculated during checkout. so far, our lamps can be found across EU countries, USA, Japan, and Egypt.</p>
+          <div class="shipping-flags" aria-hidden="true">🇪🇺 🇺🇸 🇯🇵 🇪🇬</div>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button type="button" class="faq-q">what is the return policy?<span class="faq-icon" aria-hidden="true">+</span></button>
+        <div class="faq-a"><p>1 month free return from the date of delivery. no questions asked.</p></div>
+      </div>
+
+      <div class="faq-item">
+        <button type="button" class="faq-q">is there a warranty?<span class="faq-icon" aria-hidden="true">+</span></button>
+        <div class="faq-a"><p>yes — two-year warranty on all clue. lamps.</p></div>
+      </div>
+
+      <div class="faq-item">
+        <button type="button" class="faq-q">who covers shipping costs?<span class="faq-icon" aria-hidden="true">+</span></button>
+        <div class="faq-a"><p>shipping costs are covered by the buyer.</p></div>
+      </div>
+    </div>
+
+    <div class="faq-group">
+      <div class="faq-group-title">configuration</div>
+
+      <div class="faq-item">
+        <button type="button" class="faq-q">can I change the colors of the animation?<span class="faq-icon" aria-hidden="true">+</span></button>
+        <div class="faq-a">
+          <p class="step-intro">yes — follow these steps in Chrome:</p>
+          <ol>
+            <li>connect the lamp via USB-C to your computer</li>
+            <li>open Chrome and go to <a href="https://config.cluelamp.eu" target="_blank" rel="noopener noreferrer">config.cluelamp.eu</a></li>
+            <li>turn on palette mode</li>
+            <li>turn on test mode — preview your configuration on the lamp</li>
+            <li>select the number of colors — set them with the color picker or HEX codes</li>
+            <li>turn off test mode</li>
+            <li>click the save button to write the config to the lamp</li>
+          </ol>
+          <div class="faq-note"><strong>done</strong> — your colors are stored in the lamp.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="faq-group">
+      <div class="faq-group-title">technical</div>
+
+      <div class="faq-item">
+        <button type="button" class="faq-q">what power options are available?<span class="faq-icon" aria-hidden="true">+</span></button>
+        <div class="faq-a">
+          <div class="power-cards">
+            <div class="power-card">
+              <div class="power-card-title">5v — included with all lamps</div>
+              <div class="power-card-items">2-meter USB-C cable · EU or US charging brick</div>
+              <div class="power-card-meta">
+                <span class="pro-tag">universal</span>
+                <span class="con-tag">limited distance</span>
+                <span class="con-tag">visible cable</span>
+              </div>
+            </div>
+            <div class="power-card">
+              <div class="power-card-title">12v — optional</div>
+              <div class="power-card-items">Jack adapter (EU or US) with 2-meter cable — extendable</div>
+              <div class="power-card-meta">
+                <span class="pro-tag">extended distance</span>
+                <span class="pro-tag">12v home circuits</span>
+                <span class="con-tag">cable visible unless hidden</span>
+              </div>
+            </div>
+            <div class="power-card">
+              <div class="power-card-title">110v / 230v — optional</div>
+              <div class="power-card-items">built-in power adapter · wire connector on the back</div>
+              <div class="power-card-meta">
+                <span class="pro-tag">no distance limit</span>
+                <span class="pro-tag">clean hidden cable</span>
+                <span class="con-tag">plan during interior design</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button type="button" class="faq-q">how much power does the lamp need?<span class="faq-icon" aria-hidden="true">+</span></button>
+        <div class="faq-a"><p>maximum about <strong>25W</strong>; typical use is around <strong>15W</strong> on average.</p></div>
+      </div>
+
+      <div class="faq-item">
+        <button type="button" class="faq-q">how to install the lamp?<span class="faq-icon" aria-hidden="true">+</span></button>
+        <div class="faq-a">
+          <p>there are two ways to set it up — both parts are included in the box:</p>
+          <ul>
+            <li><strong>wall</strong> — use the screw hanger from the box</li>
+            <li><strong>shelf or desk</strong> — use the stand from the box</li>
+            <li>connect USB-C to power</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button type="button" class="faq-q">how does the animation work?<span class="faq-icon" aria-hidden="true">+</span></button>
+        <div class="faq-a"><p>the animation is driven by a generative algorithm — every frame is computed independently, so no two moments are ever identical.</p></div>
+      </div>
+
+      <div class="faq-item">
+        <button type="button" class="faq-q">does it need an internet connection?<span class="faq-icon" aria-hidden="true">+</span></button>
+        <div class="faq-a"><p>no. the algorithm runs entirely on the lamp's hardware — no internet connection or app needed.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <a href="/" class="logo">clue.</a>
+  <p>crafted by Jakub Kirklewski · elektrojakub</p>
+  <p>© 2026 cluelamp.eu</p>
+</footer>
+
+<script>
+// ── Generative gradient background ──────────────────────────────────────────
+(function () {
+  const canvas = document.getElementById('bg-canvas');
+  const ctx = canvas.getContext('2d');
+  let W = 0;
+  let H = 0;
+  let blobs;
+
+  const COLORS = [
+    [255, 160, 200],
+    [160, 180, 255],
+    [255, 220, 160],
+    [180, 240, 200],
+    [210, 170, 255],
+  ];
+
+  function initBlobs() {
+    blobs = COLORS.map(rgb => ({
+      x: Math.random() * W,
+      y: Math.random() * H,
+      r: W * (0.25 + Math.random() * 0.2),
+      rgb,
+      vx: (Math.random() - 0.5) * 0.3,
+      vy: (Math.random() - 0.5) * 0.3,
+    }));
+  }
+
+  function scaleBlobsTo(newW, newH) {
+    if (W < 1 || H < 1 || !blobs || blobs.length !== COLORS.length) return false;
+    const sx = newW / W;
+    const sy = newH / H;
+    const sR = Math.sqrt(sx * sy);
+    for (const b of blobs) {
+      b.x *= sx;
+      b.y *= sy;
+      b.r *= sR;
+      b.x = Math.max(-b.r, Math.min(newW + b.r, b.x));
+      b.y = Math.max(-b.r, Math.min(newH + b.r, b.y));
+    }
+    return true;
+  }
+
+  function applyResize() {
+    const newW = window.innerWidth;
+    const newH = window.innerHeight;
+    if (newW < 1 || newH < 1) return;
+
+    if (W < 1 || H < 1) {
+      W = newW;
+      H = newH;
+      canvas.width = W;
+      canvas.height = H;
+      initBlobs();
+      return;
+    }
+
+    if (newW === W && newH === H) return;
+
+    scaleBlobsTo(newW, newH);
+    W = newW;
+    H = newH;
+    canvas.width = W;
+    canvas.height = H;
+  }
+
+  let resizeRaf = 0;
+  function scheduleResize() {
+    if (resizeRaf) return;
+    resizeRaf = requestAnimationFrame(function () {
+      resizeRaf = 0;
+      applyResize();
+    });
+  }
+
+  function draw() {
+    if (W < 1 || H < 1 || !blobs) {
+      requestAnimationFrame(draw);
+      return;
+    }
+    ctx.clearRect(0, 0, W, H);
+    ctx.fillStyle = '#fafafa';
+    ctx.fillRect(0, 0, W, H);
+    for (const b of blobs) {
+      const grd = ctx.createRadialGradient(b.x, b.y, 0, b.x, b.y, b.r);
+      grd.addColorStop(0, `rgba(${b.rgb[0]},${b.rgb[1]},${b.rgb[2]},0.38)`);
+      grd.addColorStop(1, `rgba(${b.rgb[0]},${b.rgb[1]},${b.rgb[2]},0)`);
+      ctx.fillStyle = grd;
+      ctx.beginPath();
+      ctx.arc(b.x, b.y, b.r, 0, Math.PI * 2);
+      ctx.fill();
+      b.x += b.vx;
+      b.y += b.vy;
+      if (b.x < -b.r || b.x > W + b.r) b.vx *= -1;
+      if (b.y < -b.r || b.y > H + b.r) b.vy *= -1;
+    }
+    requestAnimationFrame(draw);
+  }
+
+  window.addEventListener('resize', scheduleResize);
+  applyResize();
+  draw();
+})();
+
+// ── Shader preview ────────────────────────────────────────────────────────────
+(function () {
+  const VERT = `
+    attribute vec3 aPosition;
+    void main() { gl_Position = vec4(aPosition, 1.0); }
+  `;
+
+  const FRAG = `
+    #ifdef GL_ES
+    precision mediump float;
+    #endif
+    uniform vec2  resolution;
+    uniform float shift;
+    uniform float density;
+    uniform float fadeStartInner;
+    uniform float fadeEndInner;
+    uniform float fadeStartOuter;
+    uniform float fadeEndOuter;
+    uniform float progress;
+    uniform float ringShiftProgress;
+    uniform float shiftAmount;
+    uniform float shiftSpeed;
+    uniform int   distanceMode;
+    uniform vec2  uAnchor;
+
+    float hash(vec2 p)  { return fract(sin(dot(p, vec2(127.1,311.7)))*43758.5453); }
+    float hash1(float n){ return fract(sin(n)*43758.5453); }
+    float noise(vec2 p) {
+      vec2 i=floor(p); vec2 f=fract(p);
+      vec2 u=f*f*(3.0-2.0*f);
+      return mix(mix(hash(i),hash(i+vec2(1,0)),u.x),mix(hash(i+vec2(0,1)),hash(i+vec2(1,1)),u.x),u.y);
+    }
+    float noise1(float x){ float i=floor(x); float f=fract(x); float u=f*f*(3.0-2.0*f); return mix(hash1(i),hash1(i+1.0),u); }
+    float signedNoise1(float x){ return noise1(x)*2.0-1.0; }
+
+    void main() {
+      vec2 uv = (gl_FragCoord.xy - uAnchor) / min(resolution.x, resolution.y);
+      float radius = length(uv);
+      float ringPhase = ringShiftProgress + shiftSpeed;
+      float dr = signedNoise1(ringPhase +  0.0) * shiftAmount;
+      float dg = signedNoise1(ringPhase + 12.0) * shiftAmount;
+      float db = signedNoise1(ringPhase + 24.0) * shiftAmount;
+      float r = noise(vec2((radius+dr)*density, progress));
+      float g = noise(vec2((radius+dg)*density, progress+shift));
+      float b = noise(vec2((radius+db)*density, progress+shift*2.0));
+      float fadeIn  = (fadeEndInner > fadeStartInner) ? smoothstep(fadeStartInner, fadeEndInner, radius) : 1.0;
+      float fadeOut = smoothstep(fadeEndOuter, fadeStartOuter, radius);
+      float alpha   = fadeIn * fadeOut;
+      gl_FragColor  = vec4(vec3(r,g,b), alpha);
+    }
+  `;
+
+  window._shaderParams = {
+    shift:          1.00,
+    density:        3.80,
+    channelSpeed:   0.20,
+    ringShiftSpeed: 0.10,
+    shiftAmount:    0.50,
+    fadeStartInner: 0.00,
+    fadeEndInner:   0.00,
+    fadeStartOuter: 0.91,
+    fadeEndOuter:   1.00,
+  };
+  const P = window._shaderParams;
+  const container = document.getElementById('shader-container');
+
+  function isNarrowShaderPreview() {
+    return typeof window.matchMedia === 'function' &&
+      window.matchMedia('(max-width: 720px)').matches;
+  }
+
+  function measureShaderContainer() {
+    const rect = container.getBoundingClientRect();
+    return {
+      w: Math.max(1, Math.round(rect.width)),
+      h: Math.max(1, Math.round(rect.height)),
+    };
+  }
+
+  const script = document.createElement('script');
+  script.src = 'https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.4/p5.min.js';
+  script.onload = () => {
+    new p5(function (p) {
+      let myShader, progress, ringShiftProgress, lastTime = 0;
+
+      p.setup = function () {
+        if (isNarrowShaderPreview()) {
+          p.pixelDensity(1);
+        }
+        const { w, h } = measureShaderContainer();
+        const cnv = p.createCanvas(w, h, p.WEBGL);
+        cnv.parent(container);
+        p.frameRate(60);
+        myShader = p.createShader(VERT, FRAG);
+        lastTime = p.millis() / 1000;
+        /* random starting phase so each refresh looks different */
+        progress = Math.random() * 800 + Math.random() * 200;
+        ringShiftProgress = Math.random() * 600 + Math.random() * 200;
+
+        if (typeof ResizeObserver !== 'undefined') {
+          new ResizeObserver(function () {
+            const { w: nw, h: nh } = measureShaderContainer();
+            if (nw !== p.width || nh !== p.height) {
+              p.resizeCanvas(nw, nh);
+            }
+          }).observe(container);
+        }
+        requestAnimationFrame(function () {
+          requestAnimationFrame(function () {
+            const { w: nw, h: nh } = measureShaderContainer();
+            if (nw !== p.width || nh !== p.height) {
+              p.resizeCanvas(nw, nh);
+            }
+          });
+        });
+      };
+
+      p.draw = function () {
+        const now = p.millis() / 1000;
+        const dt  = now - lastTime;
+        lastTime  = now;
+        progress          += dt * P.channelSpeed;
+        ringShiftProgress += dt * P.ringShiftSpeed;
+
+        p.clear();
+        p.shader(myShader);
+        const narrow = isNarrowShaderPreview();
+        /* Wide canvas: anchor at (w,h) matches original look (corner outside the circular mask). Square phone: anchor at center so the orb sits in the crop circle. */
+        if (narrow) {
+          myShader.setUniform('uAnchor', [p.width * 0.5, p.height * 0.5]);
+        } else {
+          myShader.setUniform('uAnchor', [p.width, p.height]);
+        }
+        myShader.setUniform('resolution',        [p.width, p.height]);
+        myShader.setUniform('progress',          progress);
+        myShader.setUniform('ringShiftProgress', ringShiftProgress);
+        myShader.setUniform('shift',             P.shift);
+        myShader.setUniform('density',           P.density * (narrow ? 1.25 : 1));
+        myShader.setUniform('shiftSpeed',        P.ringShiftSpeed);
+        myShader.setUniform('shiftAmount',       P.shiftAmount);
+        myShader.setUniform('fadeStartInner',    P.fadeStartInner);
+        myShader.setUniform('fadeEndInner',      P.fadeEndInner);
+        myShader.setUniform('fadeStartOuter',    P.fadeStartOuter);
+        myShader.setUniform('fadeEndOuter',      P.fadeEndOuter);
+        myShader.setUniform('distanceMode',      0);
+
+        p.beginShape();
+        p.vertex(-1,-1,0,0,0); p.vertex(1,-1,0,1,0);
+        p.vertex(1,1,0,1,1);   p.vertex(-1,1,0,0,1);
+        p.endShape(p.CLOSE);
+      };
+
+      p.windowResized = function () {
+        const { w, h } = measureShaderContainer();
+        p.resizeCanvas(w, h);
+      };
+    });
+  };
+  document.head.appendChild(script);
+})();
+
+// ── Speed slider (0.1×–20×, default 10×; slider 1–200 → multiplier = value / 10) ──
+(function () {
+  const slider = document.getElementById('speed-slider');
+  const label  = document.getElementById('speed-label');
+  if (!slider || !label) return;
+
+  function multiplierFromSlider() {
+    return parseInt(slider.value, 10) / 10;
+  }
+
+  function formatMultiplier(m) {
+    return (Math.abs(m - Math.round(m)) < 1e-6 ? String(Math.round(m)) : m.toFixed(1)) + '×';
+  }
+
+  function applySpeed() {
+    const mult = multiplierFromSlider();
+    if (window._shaderParams) {
+      window._shaderParams.channelSpeed   = 0.02 * mult;
+      window._shaderParams.ringShiftSpeed = 0.01 * mult;
+    }
+    label.textContent = formatMultiplier(mult);
+  }
+
+  slider.addEventListener('input', applySpeed);
+  applySpeed();
+})();
+
+// ── Scroll card animations (achievement cards + clue recognition) ─────────────
+(function () {
+  const els = document.querySelectorAll('.achievement-card, .recognition-list--achievements');
+  const indexOfEl = (node) => Array.prototype.indexOf.call(els, node);
+
+  const io = new IntersectionObserver((entries) => {
+    const incoming = entries.filter((e) => e.isIntersecting);
+    if (!incoming.length) return;
+    incoming.sort((a, b) => indexOfEl(a.target) - indexOfEl(b.target));
+    incoming.forEach((e, i) => {
+      setTimeout(() => e.target.classList.add('visible'), i * 80);
+      io.unobserve(e.target);
+    });
+  }, { threshold: 0.15 });
+
+  els.forEach((c) => io.observe(c));
+})();
+
+// ── Count-up numbers ──────────────────────────────────────────────────────────
+(function () {
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (!e.isIntersecting) return;
+      const el = e.target, end = +el.dataset.count;
+      let cur = 0;
+      const step = () => { cur++; el.textContent = cur; if (cur < end) setTimeout(step, 120); };
+      setTimeout(step, 300);
+      io.unobserve(el);
+    });
+  }, { threshold: 0.5 });
+  document.querySelectorAll('[data-count]').forEach(c => io.observe(c));
+})();
+
+// ── FAQ accordion ─────────────────────────────────────────────────────────────
+(function () {
+  document.querySelectorAll('.faq-q').forEach((btn) => {
+    btn.setAttribute('aria-expanded', 'false');
+    btn.addEventListener('click', () => {
+      const item = btn.closest('.faq-item');
+      const ans = item && item.querySelector('.faq-a');
+      if (!ans) return;
+      const isOpen = item.classList.contains('open');
+      document.querySelectorAll('.faq-item.open').forEach((i) => {
+        i.classList.remove('open');
+        const a = i.querySelector('.faq-a');
+        if (a) a.style.maxHeight = '0';
+        const q = i.querySelector('.faq-q');
+        if (q) q.setAttribute('aria-expanded', 'false');
+      });
+      if (!isOpen) {
+        item.classList.add('open');
+        btn.setAttribute('aria-expanded', 'true');
+        const setH = () => {
+          ans.style.maxHeight = ans.scrollHeight + 'px';
+        };
+        setH();
+        requestAnimationFrame(() => requestAnimationFrame(setH));
+        ans.querySelectorAll('img').forEach((img) => {
+          if (!img.complete) img.addEventListener('load', setH, { once: true });
+        });
+      }
+    });
+  });
+})();
+
+</script>
+</body>
+</html>

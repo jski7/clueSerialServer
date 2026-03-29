@@ -23,7 +23,6 @@ function setup() {
   let container = createDiv();
   container.parent(select('main'));
   container.id('centered-content');
-  container.style('margin-top', `${windowHeight * 0.1}px`);
 
   let logoContainer = createDiv()
     .parent(container)
@@ -40,12 +39,7 @@ function setup() {
     .style('justify-content', 'center')
     .style('margin-bottom', '20px');
   let titleLabel = createSpan('shutdown fix').parent(titleContainer);
-  titleLabel
-    .style('font-size', '12px')
-    .style('font-weight', 'normal')
-    .style('color', '#888888')
-    .style('letter-spacing', '0.5px')
-    .style('text-transform', 'uppercase');
+  titleLabel.addClass('config-page-label');
 
   let buttonContainer = createDiv()
     .parent(container)

@@ -1,28 +1,183 @@
-/* Center the content horizontally and vertically */
-body, html {
-    height: 100%;
-    margin: 0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-family: Arial, sans-serif;
-    background-color: #000000;
-  }
+html {
+  margin: 0;
+  height: 100%;
+}
 
+body {
+  margin: 0;
+}
 
-  #centered-content {
-    text-align: center;
-    width: 48%;
-    min-width: 256px;
-    max-width: 320px;
-    margin: 40px auto 70px auto;
-    border: 1px solid #e0e0e0;
-    padding: 20px;
-    border-radius: 12px;
-    background: linear-gradient(135deg, #f9f9f9 0%, #f0f0f0 100%);
-    box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.15);
-    font-size: 12px;
-  }
+/* Default: dark centered layout (update pages, etc.) */
+body:not(.config-page-theme) {
+  height: 100%;
+  min-height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-family: Arial, sans-serif;
+  background-color: #000000;
+}
+
+/* Config / shutdownfix: about-style light page + animated background */
+body.config-page-theme {
+  --purple: #6600ff;
+  --text: #3a3a3a;
+  --text-light: #6a6a6a;
+  --bg: #fafafa;
+  min-height: 100vh;
+  height: auto;
+  display: block;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  color: var(--text);
+  background: var(--bg);
+  overflow-x: hidden;
+}
+
+html:has(body.config-page-theme) {
+  height: auto;
+  min-height: 100%;
+  scroll-behavior: smooth;
+}
+
+#bg-canvas {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+body.config-page-theme main {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  min-height: 100vh;
+  padding: 24px 16px 48px;
+  box-sizing: border-box;
+}
+
+/* Preview → config card → footer (p5 appends #centered-content after static nodes) */
+body.config-page-theme .animation-preview-wrap {
+  order: 1;
+}
+
+#centered-content {
+  text-align: center;
+  width: 48%;
+  min-width: 256px;
+  max-width: 320px;
+  margin: 40px auto 70px auto;
+  border: 1px solid #e0e0e0;
+  padding: 20px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #f9f9f9 0%, #f0f0f0 100%);
+  box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.15);
+  font-size: 12px;
+}
+
+body.config-page-theme #centered-content {
+  order: 2;
+  margin: 1.25rem auto 0.35rem;
+  border: 1px solid rgba(102, 0, 255, 0.12);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.72);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 8px 32px rgba(102, 0, 255, 0.08), 0 2px 16px rgba(0, 0, 0, 0.04);
+  color: var(--text);
+}
+
+/* p5 preview — padding + no isolation (isolate clips backdrop-filter); circular canvas clip */
+.animation-preview-wrap {
+  --preview-pad: clamp(20px, 5.5vw, 40px);
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: fit-content;
+  max-width: min(100%, calc(100vw - 24px));
+  margin: 0 auto 32px;
+  padding: var(--preview-pad);
+  box-sizing: content-box;
+  background: transparent;
+  box-shadow: none;
+  border: none;
+  border-radius: 50%;
+  overflow: visible;
+  z-index: 10;
+}
+
+.animation-preview-wrap canvas {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  background: transparent !important;
+  border-radius: 50%;
+}
+
+.animation-preview-wrap::after {
+  content: '';
+  position: absolute;
+  inset: var(--preview-pad);
+  pointer-events: none;
+  z-index: 1;
+  border-radius: 50%;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  background: rgba(255, 255, 255, 0.07);
+  -webkit-mask-image: radial-gradient(
+    circle closest-side at 50% 50%,
+    #000 72%,
+    transparent 100%
+  );
+  mask-image: radial-gradient(
+    circle closest-side at 50% 50%,
+    #000 72%,
+    transparent 100%
+  );
+}
+
+body.config-page-theme #centered-content span:not(.slider):not(.loading-spinner),
+body.config-page-theme #centered-content label {
+  color: var(--text-light);
+}
+
+body.config-page-theme .config-page-label {
+  color: var(--purple) !important;
+  font-size: 0.72rem !important;
+  font-weight: 500 !important;
+  letter-spacing: 0.2em !important;
+  text-transform: uppercase !important;
+}
+
+/* Footer link (matches big_cartel_pages/links.html) */
+body.config-page-theme footer.config-page-footer {
+  order: 3;
+  position: relative;
+  z-index: 10;
+  text-align: center;
+  margin: 0 auto 0;
+  width: 100%;
+  max-width: 400px;
+  padding-top: 6px;
+  padding-left: 16px;
+  padding-right: 16px;
+  box-sizing: border-box;
+  border-top: 1px solid rgba(102, 0, 255, 0.12);
+}
+
+body.config-page-theme footer.config-page-footer a {
+  font-size: 0.75rem;
+  color: var(--text-light);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+body.config-page-theme footer.config-page-footer a:hover {
+  color: var(--purple);
+}
 
   /* Update page specific: position white box at bottom */
   body:has(#centered-content[style*="position: absolute"]) #centered-content {
@@ -31,7 +186,7 @@ body, html {
 
 /* CSS */
 .button-36 {
-background-image: linear-gradient(92.88deg, #7600FF 9.16%, #7600FF 43.89%, #7600FF 64.72%);
+background-image: linear-gradient(92.88deg, #6600ff 9.16%, #6600ff 43.89%, #6600ff 64.72%);
 border-radius: 6px;
 border-style: none;
 box-sizing: border-box;
@@ -52,7 +207,7 @@ touch-action: manipulation;
 }
 
 .button-36:hover {
-box-shadow: rgba(118, 0, 255, 0.5) 0 1px 30px;
+box-shadow: rgba(102, 0, 255, 0.45) 0 1px 30px;
 transition-duration: .1s;
 }
 
@@ -99,7 +254,7 @@ transition-duration: .1s;
   right: 0.25em;
   bottom: 0.25em;
   transform: translateX(150%);
-  background-color: #7600FF;
+  background-color: #6600ff;
   border-radius: inherit;
   transition: all 0.4s cubic-bezier(0.215, 0.610, 0.355, 1);
 }
@@ -130,6 +285,7 @@ transition-duration: .1s;
 
 input[type="color"] {
 	-webkit-appearance: none;
+	appearance: none;
 	border: none;
 	width: 40px;
 	height: 16px;
@@ -163,6 +319,10 @@ span {
   height: 1px;
   background: linear-gradient(90deg, transparent 0%, #e0e0e0 50%, transparent 100%);
   margin: 6px 0 12px 0;
+}
+
+body.config-page-theme .section-divider {
+  background: linear-gradient(90deg, transparent, rgba(102, 0, 255, 0.15), transparent);
 }
 
 /* Update button styling */
@@ -222,12 +382,28 @@ span {
   margin-bottom: 200px;
 }
 
+body.config-page-theme #defaultCanvas0 {
+  position: relative;
+  z-index: 0;
+  margin: 0;
+  display: block;
+  background: transparent !important;
+}
+
 @media (max-width: 600px) {
   #defaultCanvas0 {
     width: 95vw !important;
     height: auto !important;
     margin: 10px auto 0 auto;
     display: block;
+  }
+
+  body.config-page-theme #defaultCanvas0 {
+    margin: 0;
+  }
+
+  .animation-preview-wrap {
+    margin-bottom: 20px;
   }
 }
 

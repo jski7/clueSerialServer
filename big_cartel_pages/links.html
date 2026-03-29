@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>clue. — links</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --purple: #6600ff;
+      --purple-soft: rgba(102, 0, 255, 0.08);
+      --purple-line: rgba(102, 0, 255, 0.12);
+      --text: #3a3a3a;
+      --text-light: #6a6a6a;
+      --bg: #fafafa;
+      --card: #ffffff;
+      --shadow: 0 1px 2px rgba(0, 0, 0, 0.04), 0 8px 24px rgba(102, 0, 255, 0.06);
+      --shadow-hover: 0 4px 12px rgba(102, 0, 255, 0.12), 0 16px 40px rgba(0, 0, 0, 0.06);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100dvh;
+      overflow-x: hidden;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 10px 0;
+    }
+
+    #bg-canvas {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    .clue-links-wrap {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      max-width: 400px;
+      margin: 0 auto;
+      padding: 8px 16px 12px;
+    }
+
+    /*
+      Big Cartel themes often set header { justify-content: space-between },
+      which pushes the logo and “links” tagline to opposite edges. Use a div
+      (not <header>) and keep logo + tagline inside one inner flex cluster.
+    */
+    .links-header {
+      width: 100%;
+      display: flex !important;
+      flex-direction: column !important;
+      align-items: center !important;
+      justify-content: center !important;
+      text-align: center !important;
+      margin-bottom: 12px;
+    }
+
+    .links-header-cluster {
+      display: inline-flex !important;
+      flex-direction: row;
+      align-items: baseline;
+      justify-content: center !important;
+      flex-wrap: wrap;
+      gap: 10px;
+      max-width: 100%;
+    }
+
+    .links-logo {
+      display: inline-block !important;
+      text-align: center !important;
+      font-size: 1.35rem;
+      font-weight: 700;
+      color: var(--purple);
+      letter-spacing: -0.04em;
+      text-decoration: none;
+      transition: opacity 0.2s;
+    }
+
+    .links-logo:hover { opacity: 0.85; }
+
+    .tagline {
+      font-size: 0.62rem;
+      font-weight: 600;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--text-light);
+    }
+
+    .intro {
+      text-align: center;
+      font-size: 0.72rem;
+      line-height: 1.4;
+      color: var(--text-light);
+      margin-bottom: 14px;
+      letter-spacing: 0.02em;
+    }
+
+    .group {
+      margin-bottom: 12px;
+    }
+
+    .group-label {
+      font-size: 0.58rem;
+      font-weight: 600;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--purple);
+      margin-bottom: 5px;
+      padding-left: 2px;
+    }
+
+    ul.links {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .group-social ul.links {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 5px;
+    }
+
+    .group-social .link-card {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0;
+      padding: 8px 10px;
+      min-height: 0;
+    }
+
+    .group-social .link-icon {
+      width: 30px;
+      height: 30px;
+      font-size: 0.95rem;
+      border-radius: 8px;
+      margin-bottom: 4px;
+    }
+
+    .group-social .link-title {
+      font-size: 0.78rem;
+      line-height: 1.25;
+    }
+
+    .group-social .link-meta {
+      font-size: 0.62rem;
+      margin-top: 2px;
+    }
+
+    .group-social .link-arrow {
+      display: none;
+    }
+
+    .link-card {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 12px;
+      background: var(--card);
+      border: 1px solid var(--purple-line);
+      border-radius: 10px;
+      text-decoration: none;
+      color: inherit;
+      box-shadow: var(--shadow);
+      transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
+    }
+
+    .link-card:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-hover);
+      border-color: rgba(102, 0, 255, 0.28);
+    }
+
+    .link-card:focus-visible {
+      outline: 2px solid var(--purple);
+      outline-offset: 2px;
+    }
+
+    .link-icon {
+      width: 34px;
+      height: 34px;
+      border-radius: 9px;
+      background: var(--purple-soft);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.05rem;
+      flex-shrink: 0;
+    }
+
+    .link-body {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .link-title {
+      font-size: 0.84rem;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      line-height: 1.25;
+    }
+
+    .link-meta {
+      font-size: 0.65rem;
+      color: var(--text-light);
+      margin-top: 1px;
+    }
+
+    .link-arrow {
+      color: var(--purple);
+      opacity: 0.45;
+      font-size: 0.95rem;
+      flex-shrink: 0;
+      transition: transform 0.2s ease, opacity 0.2s;
+    }
+
+    .link-card:hover .link-arrow {
+      opacity: 1;
+      transform: translateX(3px);
+    }
+
+    footer {
+      text-align: center;
+      margin-top: 10px;
+      padding-top: 10px;
+      border-top: 1px solid var(--purple-line);
+    }
+
+    footer a {
+      font-size: 0.75rem;
+      color: var(--text-light);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    footer a:hover { color: var(--purple); }
+
+    @media (max-width: 359px) {
+      .group-social ul.links {
+        grid-template-columns: 1fr;
+      }
+      .group-social .link-card {
+        flex-direction: row;
+        align-items: center;
+        gap: 10px;
+        padding: 9px 12px;
+      }
+      .group-social .link-icon {
+        margin-bottom: 0;
+      }
+      .group-social .link-arrow {
+        display: block;
+      }
+    }
+  </style>
+</head>
+<body>
+  <canvas id="bg-canvas" aria-hidden="true"></canvas>
+  <div class="clue-links-wrap">
+    <div class="links-header" role="banner">
+      <div class="links-header-cluster">
+        <a class="links-logo" href="https://clue.bigcartel.com/">clue.</a>
+        <span class="tagline">links</span>
+      </div>
+    </div>
+    <p class="intro">Lamp tools · social · contact</p>
+
+    <div class="group">
+      <p class="group-label">Lamp</p>
+      <ul class="links">
+        <li>
+          <a class="link-card" href="https://config.cluelamp.eu/" target="_blank" rel="noopener noreferrer">
+            <span class="link-icon" aria-hidden="true">💡</span>
+            <span class="link-body">
+              <span class="link-title">Lamp configuration</span>
+              <span class="link-meta">Chrome recommended</span>
+            </span>
+            <span class="link-arrow" aria-hidden="true">→</span>
+          </a>
+        </li>
+        <li>
+          <a class="link-card" href="http://update.cluelamp.eu/" target="_blank" rel="noopener noreferrer">
+            <span class="link-icon" aria-hidden="true">⬆️</span>
+            <span class="link-body">
+              <span class="link-title">Lamp firmware update</span>
+              <span class="link-meta">Chrome recommended</span>
+            </span>
+            <span class="link-arrow" aria-hidden="true">→</span>
+          </a>
+        </li>
+      </ul>
+    </div>
+
+    <div class="group group-social">
+      <p class="group-label">Social</p>
+      <ul class="links">
+        <li>
+          <a class="link-card" href="https://www.instagram.com/clue.lamp/" target="_blank" rel="noopener noreferrer">
+            <span class="link-icon" aria-hidden="true">📷</span>
+            <span class="link-body">
+              <span class="link-title">Instagram — clue.</span>
+              <span class="link-meta">@clue.lamp</span>
+            </span>
+            <span class="link-arrow" aria-hidden="true">→</span>
+          </a>
+        </li>
+        <li>
+          <a class="link-card" href="https://www.instagram.com/elektrojakub/" target="_blank" rel="noopener noreferrer">
+            <span class="link-icon" aria-hidden="true">👨‍🔧</span>
+            <span class="link-body">
+              <span class="link-title">Instagram — creator</span>
+              <span class="link-meta">Behind the scenes</span>
+            </span>
+            <span class="link-arrow" aria-hidden="true">→</span>
+          </a>
+        </li>
+        <li>
+          <a class="link-card" href="https://pl.pinterest.com/cluelamp/" target="_blank" rel="noopener noreferrer">
+            <span class="link-icon" aria-hidden="true">📌</span>
+            <span class="link-body">
+              <span class="link-title">Pinterest</span>
+              <span class="link-meta">Inspiration &amp; saves</span>
+            </span>
+            <span class="link-arrow" aria-hidden="true">→</span>
+          </a>
+        </li>
+        <li>
+          <a class="link-card" href="https://www.tiktok.com/@clue.lamp" target="_blank" rel="noopener noreferrer">
+            <span class="link-icon" aria-hidden="true">🎵</span>
+            <span class="link-body">
+              <span class="link-title">TikTok</span>
+              <span class="link-meta">@clue.lamp</span>
+            </span>
+            <span class="link-arrow" aria-hidden="true">→</span>
+          </a>
+        </li>
+      </ul>
+    </div>
+
+    <div class="group">
+      <p class="group-label">Contact</p>
+      <ul class="links">
+        <li>
+          <a class="link-card" href="https://clue.bigcartel.com/contact">
+            <span class="link-icon" aria-hidden="true">✉️</span>
+            <span class="link-body">
+              <span class="link-title">Email &amp; contact</span>
+              <span class="link-meta">Message the store</span>
+            </span>
+            <span class="link-arrow" aria-hidden="true">→</span>
+          </a>
+        </li>
+      </ul>
+    </div>
+
+    <footer>
+      <a href="https://clue.bigcartel.com/">← Back to clue. shop</a>
+    </footer>
+  </div>
+
+  <script>
+  // Generative gradient background (same visual language as about page)
+  (function () {
+    const canvas = document.getElementById('bg-canvas');
+    const ctx = canvas && canvas.getContext('2d');
+    if (!canvas || !ctx) return;
+
+    let W = 0;
+    let H = 0;
+    let blobs;
+
+    const COLORS = [
+      [255, 160, 200],
+      [160, 180, 255],
+      [255, 220, 160],
+      [180, 240, 200],
+      [210, 170, 255],
+    ];
+
+    function initBlobs() {
+      blobs = COLORS.map(function (rgb) {
+        return {
+          x: Math.random() * W,
+          y: Math.random() * H,
+          r: W * (0.25 + Math.random() * 0.2),
+          rgb: rgb,
+          vx: (Math.random() - 0.5) * 0.3,
+          vy: (Math.random() - 0.5) * 0.3,
+        };
+      });
+    }
+
+    function scaleBlobsTo(newW, newH) {
+      if (W < 1 || H < 1 || !blobs || blobs.length !== COLORS.length) return false;
+      const sx = newW / W;
+      const sy = newH / H;
+      const sR = Math.sqrt(sx * sy);
+      blobs.forEach(function (b) {
+        b.x *= sx;
+        b.y *= sy;
+        b.r *= sR;
+        b.x = Math.max(-b.r, Math.min(newW + b.r, b.x));
+        b.y = Math.max(-b.r, Math.min(newH + b.r, b.y));
+      });
+      return true;
+    }
+
+    function applyResize() {
+      const newW = window.innerWidth;
+      const newH = window.innerHeight;
+      if (newW < 1 || newH < 1) return;
+
+      if (W < 1 || H < 1) {
+        W = newW; H = newH;
+        canvas.width = W; canvas.height = H;
+        initBlobs();
+        return;
+      }
+
+      if (newW === W && newH === H) return;
+      scaleBlobsTo(newW, newH);
+      W = newW; H = newH;
+      canvas.width = W; canvas.height = H;
+    }
+
+    let resizeRaf = 0;
+    function scheduleResize() {
+      if (resizeRaf) return;
+      resizeRaf = requestAnimationFrame(function () {
+        resizeRaf = 0;
+        applyResize();
+      });
+    }
+
+    function draw() {
+      if (W < 1 || H < 1 || !blobs) {
+        requestAnimationFrame(draw);
+        return;
+      }
+
+      ctx.clearRect(0, 0, W, H);
+      ctx.fillStyle = '#fafafa';
+      ctx.fillRect(0, 0, W, H);
+
+      blobs.forEach(function (b) {
+        const grd = ctx.createRadialGradient(b.x, b.y, 0, b.x, b.y, b.r);
+        grd.addColorStop(0, 'rgba(' + b.rgb[0] + ',' + b.rgb[1] + ',' + b.rgb[2] + ',0.38)');
+        grd.addColorStop(1, 'rgba(' + b.rgb[0] + ',' + b.rgb[1] + ',' + b.rgb[2] + ',0)');
+        ctx.fillStyle = grd;
+        ctx.beginPath();
+        ctx.arc(b.x, b.y, b.r, 0, Math.PI * 2);
+        ctx.fill();
+
+        b.x += b.vx;
+        b.y += b.vy;
+        if (b.x < -b.r || b.x > W + b.r) b.vx *= -1;
+        if (b.y < -b.r || b.y > H + b.r) b.vy *= -1;
+      });
+
+      requestAnimationFrame(draw);
+    }
+
+    window.addEventListener('resize', scheduleResize);
+    applyResize();
+    draw();
+  })();
+  </script>
+
+</body>
+</html>

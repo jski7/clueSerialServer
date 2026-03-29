@@ -119,9 +119,10 @@ function generateGradient(colors = defaultColors, BLEND = false) {
 }
 
 // Function to render the lamp visualization
-function renderLamp(rows, cols, colors, blendMode = true) {
+// rDiscScale: draw disk smaller than canvas so pixels never touch the bitmap edge (avoids square “caps” with CSS blur).
+function renderLamp(rows, cols, colors, blendMode = true, rDiscScale = 0.88) {
     generateGradient(colors, blendMode);
-    background(0); 
+    clear(); // Transparent preview background so page styles show through.
     GRADIENT.loadPixels();
 
     for (let y = 0; y < rows; y++) {
@@ -139,8 +140,9 @@ function renderLamp(rows, cols, colors, blendMode = true) {
             let b = - h/2 + y * size_y;
             let d = sqrt(a**2 + b**2);
 
-            if (d < w/2) {
-                let i = floor((d / (w/2)) * GRADIENT.width);
+            let rDisc = (min(w, h) / 2) * rDiscScale;
+            if (d < rDisc) {
+                let i = floor(constrain((d / rDisc) * GRADIENT.width, 0, GRADIENT.width - 1));
                 let c = color(GRADIENT.pixels[i*4], GRADIENT.pixels[i*4+1], GRADIENT.pixels[i*4+2]);
                 noStroke();
                 fill(c);
@@ -179,7 +181,15 @@ async function connectToSerialPort() {
 
 // Initialize gradient
 function initAnimation(canvasWidthMultiplier = 0.3, frameRateValue = 60) {
-    createCanvas(windowWidth * canvasWidthMultiplier, windowWidth * canvasWidthMultiplier);
+    const w = windowWidth * canvasWidthMultiplier;
+    const cnv = createCanvas(w, w);
+    if (cnv && cnv.elt) {
+        cnv.elt.style.background = 'transparent';
+    }
+    const previewWrap = document.getElementById('animation-preview-wrap');
+    if (previewWrap) {
+        cnv.parent(previewWrap);
+    }
     noStroke();
     GRADIENT = createGraphics(GRADIENT_QUALITY, 20);
     GRADIENT.pixelDensity(1);
