@@ -119,8 +119,8 @@ function generateGradient(colors = defaultColors, BLEND = false) {
 }
 
 // Function to render the lamp visualization
-// rDiscScale: draw disk smaller than canvas so pixels never touch the bitmap edge (avoids square “caps” with CSS blur).
-function renderLamp(rows, cols, colors, blendMode = true, rDiscScale = 0.88) {
+// rDiscScale: max disc radius; edgeFade: fraction of radius over which alpha eases to 0 (smooth circle, no blocky cutoff).
+function renderLamp(rows, cols, colors, blendMode = true, rDiscScale = 0.88, edgeFade = 0.2) {
     generateGradient(colors, blendMode);
     clear(); // Transparent preview background so page styles show through.
     GRADIENT.loadPixels();
@@ -136,18 +136,36 @@ function renderLamp(rows, cols, colors, blendMode = true, rDiscScale = 0.88) {
             let pos_x = startx + x * size_x;
             let pos_y = starty + y * size_y;
 
-            let a = - w/2 + x * size_x;
-            let b = - h/2 + y * size_y;
-            let d = sqrt(a**2 + b**2);
+            // Cell center distance from canvas center (smoother edge than corner-based d)
+            let cx = pos_x + size_x * 0.5 - w * 0.5;
+            let cy = pos_y + size_y * 0.5 - h * 0.5;
+            let d = sqrt(cx * cx + cy * cy);
 
             let rDisc = (min(w, h) / 2) * rDiscScale;
-            if (d < rDisc) {
-                let i = floor(constrain((d / rDisc) * GRADIENT.width, 0, GRADIENT.width - 1));
-                let c = color(GRADIENT.pixels[i*4], GRADIENT.pixels[i*4+1], GRADIENT.pixels[i*4+2]);
-                noStroke();
-                fill(c);
-                rect(pos_x, pos_y, size_x, size_y);
+            let rSolid = rDisc * (1 - edgeFade);
+            if (d > rDisc) {
+                continue;
             }
+
+            let i = floor(constrain((d / rDisc) * GRADIENT.width, 0, GRADIENT.width - 1));
+            let r = GRADIENT.pixels[i * 4];
+            let g = GRADIENT.pixels[i * 4 + 1];
+            let b = GRADIENT.pixels[i * 4 + 2];
+
+            let alpha = 255;
+            if (d > rSolid && rDisc > rSolid) {
+                let t = (d - rSolid) / (rDisc - rSolid);
+                t = constrain(t, 0, 1);
+                t = t * t * (3 - 2 * t); // smoothstep
+                alpha = floor(255 * (1 - t));
+            }
+            if (alpha < 3) {
+                continue;
+            }
+
+            noStroke();
+            fill(color(r, g, b, alpha));
+            rect(pos_x, pos_y, size_x, size_y);
         }
     }
 }

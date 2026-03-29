@@ -79,7 +79,7 @@ body.config-page-theme .animation-preview-wrap {
 
 body.config-page-theme #centered-content {
   order: 2;
-  margin: 1.25rem auto 0.35rem;
+  margin: 0.55rem auto 0.35rem;
   border: 1px solid rgba(102, 0, 255, 0.12);
   border-radius: 16px;
   background: rgba(255, 255, 255, 0.72);
@@ -89,7 +89,7 @@ body.config-page-theme #centered-content {
   color: var(--text);
 }
 
-/* p5 preview — padding + no isolation (isolate clips backdrop-filter); circular canvas clip */
+/* p5 preview — circular feather mask (smooth fade to transparent) + frosted overlay */
 .animation-preview-wrap {
   --preview-pad: clamp(20px, 5.5vw, 40px);
   position: relative;
@@ -98,15 +98,35 @@ body.config-page-theme #centered-content {
   align-items: center;
   width: fit-content;
   max-width: min(100%, calc(100vw - 24px));
-  margin: 0 auto 32px;
+  margin: 0 auto 16px;
   padding: var(--preview-pad);
   box-sizing: content-box;
   background: transparent;
   box-shadow: none;
   border: none;
-  border-radius: 50%;
   overflow: visible;
   z-index: 10;
+  /* Circle crop + tighter rim fade; canvas blur softens stair-stepped cells */
+  -webkit-mask-image: radial-gradient(
+    circle closest-side at 50% 50%,
+    #000 0%,
+    #000 64%,
+    rgba(0, 0, 0, 0.72) 71%,
+    rgba(0, 0, 0, 0.22) 80%,
+    transparent 87%
+  );
+  mask-image: radial-gradient(
+    circle closest-side at 50% 50%,
+    #000 0%,
+    #000 64%,
+    rgba(0, 0, 0, 0.72) 71%,
+    rgba(0, 0, 0, 0.22) 80%,
+    transparent 87%
+  );
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-size: 100% 100%;
+  mask-size: 100% 100%;
 }
 
 .animation-preview-wrap canvas {
@@ -114,7 +134,8 @@ body.config-page-theme #centered-content {
   max-width: 100%;
   height: auto;
   background: transparent !important;
-  border-radius: 50%;
+  filter: blur(1.35px);
+  -webkit-filter: blur(1.35px);
 }
 
 .animation-preview-wrap::after {
@@ -123,20 +144,26 @@ body.config-page-theme #centered-content {
   inset: var(--preview-pad);
   pointer-events: none;
   z-index: 1;
-  border-radius: 50%;
+  border-radius: 0;
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
   background: rgba(255, 255, 255, 0.07);
   -webkit-mask-image: radial-gradient(
     circle closest-side at 50% 50%,
-    #000 72%,
-    transparent 100%
+    #000 0%,
+    #000 66%,
+    rgba(0, 0, 0, 0.4) 78%,
+    transparent 87%
   );
   mask-image: radial-gradient(
     circle closest-side at 50% 50%,
-    #000 72%,
-    transparent 100%
+    #000 0%,
+    #000 66%,
+    rgba(0, 0, 0, 0.4) 78%,
+    transparent 87%
   );
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
 }
 
 body.config-page-theme #centered-content span:not(.slider):not(.loading-spinner),
@@ -158,14 +185,29 @@ body.config-page-theme footer.config-page-footer {
   position: relative;
   z-index: 10;
   text-align: center;
-  margin: 0 auto 0;
+  margin: 8px auto 0;
   width: 100%;
   max-width: 400px;
   padding-top: 6px;
   padding-left: 16px;
   padding-right: 16px;
   box-sizing: border-box;
-  border-top: 1px solid rgba(102, 0, 255, 0.12);
+  border-top: none;
+}
+
+body.config-page-theme footer.config-page-footer::before {
+  content: '';
+  display: block;
+  width: min(96px, 28vw);
+  height: 1px;
+  margin: 0 auto 8px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(102, 0, 255, 0.14) 20%,
+    rgba(102, 0, 255, 0.14) 80%,
+    transparent
+  );
 }
 
 body.config-page-theme footer.config-page-footer a {
@@ -403,7 +445,7 @@ body.config-page-theme #defaultCanvas0 {
   }
 
   .animation-preview-wrap {
-    margin-bottom: 20px;
+    margin-bottom: 12px;
   }
 }
 
