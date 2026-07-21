@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>clue. — about</title>
+  <link rel="icon" href="https://assets.bigcartel.com/account_favicons/87792/facvicon.png?auto=format&amp;fit=max&amp;h=32&amp;w=32" type="image/png">
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap');
 
@@ -16,9 +17,18 @@
       --bg: #fafafa;
     }
 
-    html { scroll-behavior: smooth; }
+    html {
+      scroll-behavior: smooth;
+      /* Stronger magnet between full-page screens */
+      scroll-snap-type: y mandatory;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-snap-type: none; }
+    }
 
     body {
+      position: relative;
       font-family: 'Inter', sans-serif;
       background: var(--bg);
       color: var(--text);
@@ -28,12 +38,118 @@
     #bg-canvas {
       position: fixed;
       inset: 0;
-      z-index: 0;
+      z-index: -1;
       pointer-events: none;
     }
 
+    /* Decorative rings — always behind content & shader */
+    .deco-circles {
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      overflow: hidden;
+    }
+
+    .deco-parallax {
+      position: absolute;
+      will-change: transform;
+    }
+
+    /* Stack: text (z≥10) → big rings → small rings (deepest) */
+    .deco-parallax--d { z-index: 5; } /* largest — nearest of the rings */
+    .deco-parallax--b { z-index: 4; }
+    .deco-parallax--e { z-index: 3; }
+    .deco-parallax--a { z-index: 2; }
+    .deco-parallax--c { z-index: 1; } /* smallest — deepest */
+
+    .deco-circle {
+      display: block;
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      border: 1.5px solid rgba(102, 0, 255, 0.18);
+      background:
+        radial-gradient(circle at 50% 50%,
+          rgba(102, 0, 255, 0.05) 0%,
+          rgba(102, 0, 255, 0.02) 55%,
+          transparent 72%);
+      box-shadow:
+        0 0 0 1px rgba(255, 255, 255, 0.35),
+        0 12px 40px rgba(102, 0, 255, 0.06);
+      opacity: 0.7;
+      animation: decoFloat 14s ease-in-out infinite;
+    }
+
+    .deco-parallax--a {
+      width: min(18cm, 42vw);
+      height: min(18cm, 42vw);
+      /* Below first face — clears hero */
+      top: calc(100vh + 6rem);
+      left: -8%;
+    }
+    .deco-parallax--a .deco-circle { animation-delay: 0s; }
+
+    .deco-parallax--b {
+      width: min(28cm, 52vw);
+      height: min(28cm, 52vw);
+      top: 38%;
+      right: -14%;
+    }
+    .deco-parallax--b .deco-circle {
+      animation-delay: -4s;
+      animation-duration: 18s;
+      opacity: 0.55;
+    }
+
+    .deco-parallax--c {
+      width: min(14cm, 34vw);
+      height: min(14cm, 34vw);
+      top: 58%;
+      left: 6%;
+    }
+    .deco-parallax--c .deco-circle {
+      animation-delay: -7s;
+      animation-duration: 16s;
+      opacity: 0.5;
+    }
+
+    .deco-parallax--d {
+      width: min(37cm, 62vw);
+      height: min(37cm, 62vw);
+      top: 72%;
+      right: -18%;
+    }
+    .deco-parallax--d .deco-circle {
+      animation-delay: -2s;
+      animation-duration: 20s;
+      opacity: 0.4;
+    }
+
+    .deco-parallax--e {
+      width: min(22cm, 40vw);
+      height: min(22cm, 40vw);
+      top: 88%;
+      left: -10%;
+    }
+    .deco-parallax--e .deco-circle {
+      animation-delay: -9s;
+      animation-duration: 17s;
+      opacity: 0.45;
+    }
+
+    @keyframes decoFloat {
+      0%, 100% { transform: translate(0, 0); }
+      50% { transform: translate(12px, -18px); }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .deco-circle { animation: none; }
+      .deco-parallax { will-change: auto; }
+    }
+
     /* ── Nav ── */
-    nav {
+    nav.site-nav {
       position: fixed;
       top: 0; left: 0; right: 0;
       z-index: 100;
@@ -41,8 +157,47 @@
       justify-content: space-between;
       align-items: center;
       padding: 24px 48px;
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
+      background: transparent;
+      pointer-events: none;
+    }
+
+    nav.site-nav > * { pointer-events: auto; }
+
+    /* Soft vignette blur — corners only, center stays clear */
+    .page-vignette {
+      position: fixed;
+      inset: 0;
+      z-index: 90;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.35s ease;
+      backdrop-filter: blur(20px) saturate(1.05);
+      -webkit-backdrop-filter: blur(20px) saturate(1.05);
+      background:
+        radial-gradient(ellipse 50% 45% at 0% 0%, rgba(250, 250, 250, 0.35) 0%, transparent 70%),
+        radial-gradient(ellipse 50% 45% at 100% 0%, rgba(250, 250, 250, 0.35) 0%, transparent 70%),
+        radial-gradient(ellipse 50% 45% at 0% 100%, rgba(250, 250, 250, 0.28) 0%, transparent 70%),
+        radial-gradient(ellipse 50% 45% at 100% 100%, rgba(250, 250, 250, 0.28) 0%, transparent 70%);
+      -webkit-mask-image:
+        radial-gradient(ellipse 52% 48% at 0% 0%, #000 0%, transparent 72%),
+        radial-gradient(ellipse 52% 48% at 100% 0%, #000 0%, transparent 72%),
+        radial-gradient(ellipse 52% 48% at 0% 100%, #000 0%, transparent 72%),
+        radial-gradient(ellipse 52% 48% at 100% 100%, #000 0%, transparent 72%);
+      mask-image:
+        radial-gradient(ellipse 52% 48% at 0% 0%, #000 0%, transparent 72%),
+        radial-gradient(ellipse 52% 48% at 100% 0%, #000 0%, transparent 72%),
+        radial-gradient(ellipse 52% 48% at 0% 100%, #000 0%, transparent 72%),
+        radial-gradient(ellipse 52% 48% at 100% 100%, #000 0%, transparent 72%);
+      -webkit-mask-composite: source-over;
+      mask-composite: add;
+    }
+
+    .page-vignette.is-scrolled {
+      opacity: 1;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .page-vignette { transition: none; }
     }
 
     .logo {
@@ -82,7 +237,58 @@
 
     section { position: relative; z-index: 10; }
 
-    /* ── Hero ── */
+    /* Full-page snap panels — magnet to section starts while scrolling */
+    .hero,
+    .snap-screen,
+    .faq-section {
+      scroll-snap-align: start;
+      scroll-snap-stop: always;
+    }
+
+    .hero,
+    .snap-screen {
+      min-height: 100svh;
+      max-height: 100svh;
+      box-sizing: border-box;
+    }
+
+    .snap-screen--idea {
+      overflow: hidden;
+    }
+
+    .snap-screen {
+      position: relative;
+      z-index: 10;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .snap-screen--maker {
+      justify-content: flex-start;
+      padding: 96px 0 28px;
+      overflow-x: hidden;
+      overflow-y: auto;
+      max-height: 100svh;
+    }
+
+    .snap-screen--maker .creator-left > br {
+      display: none;
+    }
+
+    .snap-screen--maker .creator-left > p:not(.creator-bio) {
+      font-size: 0.88rem;
+      line-height: 1.55;
+      margin-bottom: 8px;
+    }
+
+    .faq-section {
+      /* Tall content: snap to start, then scroll through FAQ */
+      min-height: 100svh;
+      scroll-snap-stop: normal;
+    }
+
+    /* ── Heroooo ── */
     .hero {
       min-height: 100vh;
       display: flex;
@@ -90,7 +296,7 @@
       justify-content: center;
       align-items: center;
       text-align: center;
-      padding: 120px 24px 40px;
+      padding: 110px 24px 56px;
     }
 
     .hero-tag {
@@ -123,7 +329,7 @@
       line-height: 1.75;
       color: var(--text-light);
       opacity: 0;
-      animation: fadeUp 0.8s ease 0.6s forwards;
+      animation: fadeUp 0.8s ease 1s forwards;
     }
 
     .hero-desc__stanza {
@@ -141,9 +347,205 @@
       }
     }
 
+    /* ── Size strip (first fold shop) ── */
+    .size-strip {
+      margin-top: 36px;
+      width: 100%;
+      max-width: 640px;
+      opacity: 0;
+      animation: fadeUp 0.8s ease 0.7s forwards;
+    }
+
+    .size-strip__toggle {
+      display: inline-flex;
+      align-items: center;
+      gap: 2px;
+      padding: 3px;
+      margin: 0 auto 28px;
+      background: rgba(255,255,255,0.72);
+      border: 1px solid rgba(102,0,255,0.12);
+      border-radius: 100px;
+      box-shadow: 0 2px 16px rgba(102,0,255,0.06);
+    }
+
+    .size-strip__series {
+      appearance: none;
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 0.78rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      color: var(--text-light);
+      padding: 8px 18px;
+      border-radius: 100px;
+      transition: color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .size-strip__series[aria-pressed="true"] {
+      color: #fff;
+      background: var(--purple);
+      box-shadow: 0 2px 10px rgba(102,0,255,0.28);
+    }
+
+    .size-strip__series:hover:not([aria-pressed="true"]) {
+      color: var(--purple);
+    }
+
+    .size-strip__row {
+      display: flex;
+      align-items: stretch;
+      justify-content: center;
+      gap: clamp(20px, 5vw, 44px);
+    }
+
+    .size-orb {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
+      text-decoration: none;
+      color: inherit;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .size-orb:focus-visible {
+      outline: 2px solid var(--purple);
+      outline-offset: 4px;
+      border-radius: 8px;
+    }
+
+    /* Shared stage height = largest orb, so discs share a vertical center */
+    .size-orb__stage {
+      height: clamp(132px, 30vw, 176px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .size-orb__disc {
+      --orb: 72px;
+      position: relative;
+      width: var(--orb);
+      height: var(--orb);
+      border-radius: 50%;
+      overflow: hidden;
+      background: transparent;
+      border: none;
+      box-shadow: 0 10px 28px rgba(102, 0, 255, 0.1);
+      /* Soft feathered edge instead of a hard ring */
+      -webkit-mask-image: radial-gradient(
+        circle closest-side at 50% 50%,
+        #000 58%,
+        rgba(0, 0, 0, 0.65) 72%,
+        transparent 92%
+      );
+      mask-image: radial-gradient(
+        circle closest-side at 50% 50%,
+        #000 58%,
+        rgba(0, 0, 0, 0.65) 72%,
+        transparent 92%
+      );
+      transition: transform 0.25s ease, box-shadow 0.25s ease;
+    }
+
+    .size-orb[data-size="18"] .size-orb__disc { --orb: clamp(84px, 18vw, 100px); }
+    .size-orb[data-size="28"] .size-orb__disc { --orb: clamp(112px, 24vw, 140px); }
+    .size-orb[data-size="37"] .size-orb__disc { --orb: clamp(132px, 30vw, 176px); }
+
+    /* Place photo so measured lamp center (cx/cy) lands on disc center */
+    .size-orb__disc img {
+      --img-cx: 50%;
+      --img-cy: 50%;
+      --img-zoom: 1.45;
+      position: absolute;
+      display: block;
+      width: calc(100% * var(--img-zoom));
+      height: calc(100% * var(--img-zoom));
+      max-width: none;
+      left: calc(50% - var(--img-cx) * var(--img-zoom));
+      top: calc(50% - var(--img-cy) * var(--img-zoom));
+      object-fit: cover;
+      /* no left/top/zoom transition — avoids weird jump when switching clue ↔ aion */
+    }
+
+    .size-orb:hover .size-orb__disc {
+      transform: translateY(-3px) scale(1.03);
+      box-shadow: 0 14px 36px rgba(102, 0, 255, 0.16);
+    }
+
+    .size-orb:hover .size-orb__disc img {
+      width: calc(100% * var(--img-zoom) * 1.04);
+      height: calc(100% * var(--img-zoom) * 1.04);
+      left: calc(50% - var(--img-cx) * var(--img-zoom) * 1.04);
+      top: calc(50% - var(--img-cy) * var(--img-zoom) * 1.04);
+    }
+
+    /* Life-size preview — real cm ring (below page content, above deco) */
+    .size-orb-life {
+      position: fixed;
+      z-index: 6;
+      left: 0;
+      top: 0;
+      width: 0;
+      height: 0;
+      border-radius: 50%;
+      pointer-events: none;
+      opacity: 0;
+      transform: translate(-50%, -50%);
+      border: 1.5px solid rgba(102, 0, 255, 0.42);
+      background:
+        radial-gradient(circle at 50% 50%,
+          rgba(102, 0, 255, 0.07) 0%,
+          rgba(102, 0, 255, 0.03) 55%,
+          transparent 72%);
+      box-shadow:
+        0 0 0 1px rgba(255, 255, 255, 0.55),
+        0 12px 48px rgba(102, 0, 255, 0.12);
+      /* opacity only by default — geometry transitions enabled only while morphing sizes */
+      transition: opacity 0.28s ease;
+      will-change: opacity, width, height, left, top;
+    }
+
+    .size-orb-life.is-visible {
+      opacity: 1;
+    }
+
+    .size-orb-life.is-morphing {
+      transition:
+        opacity 0.28s ease,
+        width 0.45s cubic-bezier(0.22, 1, 0.36, 1),
+        height 0.45s cubic-bezier(0.22, 1, 0.36, 1),
+        left 0.45s cubic-bezier(0.22, 1, 0.36, 1),
+        top 0.45s cubic-bezier(0.22, 1, 0.36, 1),
+        transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    .size-orb__meta {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+      min-height: 2.6em;
+    }
+
+    .size-orb__label {
+      font-size: 0.88rem;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      color: var(--text);
+    }
+
+    .size-orb__price {
+      font-size: 0.75rem;
+      color: var(--text-light);
+      letter-spacing: 0.01em;
+    }
+
     /* ── Stats ── */
     .numbers-section {
-      padding: 80px 24px 20px;
+      padding: 28px 24px 8px;
       text-align: center;
       position: relative;
       z-index: 10;
@@ -152,8 +554,8 @@
     .stat-row {
       display: flex;
       justify-content: center;
-      gap: 48px;
-      padding: 24px 24px 64px;
+      gap: 40px;
+      padding: 18px 0 0;
       flex-wrap: wrap;
       position: relative;
       z-index: 10;
@@ -176,8 +578,10 @@
       margin-top: 4px;
     }
 
-    /* ── Divider ── */
+    /* ── Divider  ── */
     .divider {
+      position: relative;
+      z-index: 10;
       max-width: 900px;
       margin: 0 auto;
       height: 1px;
@@ -185,7 +589,7 @@
     }
 
     /* ── Story ── */
-    .story { padding: 100px 24px; }
+    .story { padding: 80px 24px 28px; }
 
     .story-inner { max-width: 780px; margin: 0 auto; }
 
@@ -224,6 +628,7 @@
       border-radius: 100px;
       padding: 10px 20px;
       margin-top: 16px;
+      margin-bottom: 0;
       font-size: 0.85rem;
       color: var(--text-light);
       box-shadow: 0 2px 20px rgba(102,0,255,0.06);
@@ -238,18 +643,42 @@
 
     /* ── Shader preview ── */
     .shader-preview {
-      padding: 60px 24px 40px;
+      position: relative;
+      z-index: 20;
+      padding: 20px 24px 56px;
       text-align: center;
+      isolation: isolate;
+    }
+
+    .shader-stage {
+      position: relative;
+      z-index: 2;
+      width: 100%;
+      max-width: 1000px;
+      height: min(400px, 46vh);
+      margin: 0 auto;
+    }
+
+    /* Opaque disc behind animation so deco rings stay fully under */
+    .shader-stage::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      background: radial-gradient(circle closest-side at 50% 50%,
+        var(--bg) 0%,
+        var(--bg) 86%,
+        transparent 96%);
     }
 
     #shader-container {
       --grain-opacity: 1; /* ~250% of prior 100% cap (0.55); opacity maxes at 1 */
       position: relative;
+      z-index: 1;
       width: 100%;
-      max-width: 1000px;
-      height: 480px;
+      height: 100%;
       display: block;
-      margin: 0 auto;
       /* Tight circular crop — clips just inside where the shader fades to transparent */
       -webkit-mask-image: radial-gradient(circle closest-side at 50% 50%, black 80%, transparent 92%);
       mask-image: radial-gradient(circle closest-side at 50% 50%, black 80%, transparent 92%);
@@ -277,6 +706,8 @@
     }
 
     .art-caption {
+      position: relative;
+      z-index: 2;
       margin-top: 8px;
       font-size: 0.78rem;
       color: var(--text-light);
@@ -284,6 +715,8 @@
     }
 
     .speed-control {
+      position: relative;
+      z-index: 2;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -334,14 +767,14 @@
     }
 
     /* ── Creator ── */
-    .creator { padding: 100px 24px; }
+    .creator { padding: 24px 24px 12px; }
 
     .creator-inner {
       max-width: 900px;
       margin: 0 auto;
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 60px;
+      gap: 40px;
       align-items: start;
     }
 
@@ -387,60 +820,65 @@
       color: var(--text-light);
     }
 
-    /* ── Achievement cards ── */
+    /* ── Craft list (thin purple rings + icons) ── */
     .achievements {
       display: flex;
       flex-direction: column;
-      gap: 14px;
+      gap: 0;
     }
 
     .achievement-card {
-      background: white;
-      border: 1px solid rgba(0,0,0,0.07);
-      border-radius: 16px;
-      padding: 18px 22px;
       display: flex;
       align-items: flex-start;
-      gap: 16px;
-      box-shadow: 0 2px 16px rgba(0,0,0,0.04);
-      transition: transform 0.2s, box-shadow 0.2s;
+      gap: 12px;
+      padding: 10px 0;
+      border: none;
+      border-bottom: 1.5px solid rgba(102, 0, 255, 0.14);
+      background: transparent;
+      box-shadow: none;
+      border-radius: 0;
       opacity: 0;
-      transform: translateY(16px);
+      transform: translateY(12px);
     }
 
-    .achievement-card:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 30px rgba(102,0,255,0.1);
+    .ach-icon {
+      width: 30px;
+      height: 30px;
+      flex-shrink: 0;
+      margin-top: 1px;
+      border-radius: 50%;
+      border: 1.5px solid rgba(102, 0, 255, 0.42);
+      background:
+        radial-gradient(circle at 50% 50%,
+          rgba(102, 0, 255, 0.07) 0%,
+          transparent 72%);
+      box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.55);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--purple);
     }
 
     .achievement-card.visible {
       animation: fadeUp 0.5s ease forwards;
     }
 
-    .ach-icon {
-      width: 38px; height: 38px;
-      border-radius: 10px;
-      background: linear-gradient(135deg, rgba(102,0,255,0.12), rgba(102,0,255,0.04));
-      display: flex; align-items: center; justify-content: center;
-      flex-shrink: 0;
-      color: var(--purple);
-    }
-
     .ach-text strong {
       display: block;
-      font-size: 0.9rem;
+      font-size: 0.92rem;
       font-weight: 500;
       color: var(--text);
-      margin-bottom: 2px;
+      margin-bottom: 3px;
     }
 
     .ach-text span {
-      font-size: 0.8rem;
+      font-size: 0.84rem;
+      line-height: 1.55;
       color: var(--text-light);
     }
 
     /* ── FAQ (accordion) ── */
-    #faq { scroll-margin-top: 96px; }
+    #section-faq { scroll-margin-top: 96px; }
 
     .faq-section { padding: 100px 24px; }
 
@@ -507,6 +945,62 @@
 
     .faq-item.open .faq-a {
       padding-bottom: 16px;
+    }
+
+    /* ── Section progress dots ── */
+    .section-dots {
+      position: fixed;
+      top: 50%;
+      left: 12px;
+      right: auto;
+      bottom: auto;
+      width: auto;
+      height: auto;
+      margin: 0;
+      padding: 0;
+      transform: translateY(-50%);
+      z-index: 98;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      gap: 12px;
+      pointer-events: none;
+      background: transparent;
+    }
+
+    .section-dots > * { pointer-events: auto; }
+
+    .section-dot {
+      width: 9px;
+      height: 9px;
+      padding: 0;
+      border: 1.5px solid #c5c5c5;
+      border-radius: 50%;
+      background: transparent;
+      cursor: pointer;
+      transition: border-color 0.25s ease, transform 0.25s ease;
+    }
+
+    .section-dot:hover {
+      border-color: #9a9a9a;
+      transform: scale(1.15);
+    }
+
+    .section-dot.is-active {
+      border-color: var(--purple);
+      background: transparent;
+      transform: scale(1.2);
+    }
+
+    .section-dot.is-active:hover {
+      border-color: var(--purple);
+      background: transparent;
+    }
+
+    @media (max-width: 640px) {
+      .section-dots { left: 8px; gap: 10px; }
+      .section-dot { width: 8px; height: 8px; }
     }
 
     .faq-a p {
@@ -610,7 +1104,7 @@
       border: 1px solid rgba(0,0,0,0.1);
     }
 
-    /* material sections */
+    /* material sectasdwwwions */
     .material-section { margin-bottom: 10px; }
     .material-label {
       font-size: 0.68rem; letter-spacing: 0.14em; text-transform: uppercase;
@@ -639,10 +1133,10 @@
     .step-intro { font-size: 1.02rem; color: var(--text-light); margin-bottom: 10px; }
 
     .creator-bio {
-      font-size: 0.95rem;
-      line-height: 1.82;
+      font-size: 0.88rem;
+      line-height: 1.65;
       color: var(--text-light);
-      margin-bottom: 16px;
+      margin-bottom: 10px;
     }
 
     .creator-bio a {
@@ -654,15 +1148,15 @@
     .creator-bio a:hover { text-decoration: underline; }
 
     .recognition-list {
-      margin-top: 28px;
-      padding: 20px 22px;
-      background: white;
-      border: 1px solid rgba(102,0,255,0.12);
-      border-radius: 16px;
-      box-shadow: 0 4px 24px rgba(102,0,255,0.06);
+      margin-top: 16px;
+      padding: 0;
+      background: transparent;
+      border: none;
+      border-radius: 0;
+      box-shadow: none;
     }
 
-    .recognition-list .section-label { margin-bottom: 14px; }
+    .recognition-list .section-label { margin-bottom: 8px; }
 
     .recognition-list ul {
       list-style: none;
@@ -671,12 +1165,12 @@
     }
 
     .recognition-list li {
-      font-size: 0.92rem;
-      line-height: 1.65;
+      font-size: 0.85rem;
+      line-height: 1.5;
       color: var(--text-light);
-      padding: 8px 0 8px 28px;
+      padding: 8px 0 8px 24px;
       position: relative;
-      border-bottom: 1px solid rgba(0,0,0,0.05);
+      border-bottom: 1.5px solid rgba(102, 0, 255, 0.14);
     }
 
     .recognition-list li:last-child { border-bottom: none; }
@@ -685,12 +1179,14 @@
       content: '';
       position: absolute;
       left: 0;
-      top: 14px;
-      width: 10px;
-      height: 10px;
+      /* Center on first line: padding-top + half line-height − half bullet */
+      top: calc(8px + (0.85rem * 1.5 - 12px) / 2);
+      width: 12px;
+      height: 12px;
       border-radius: 50%;
-      background: var(--purple);
-      opacity: 0.85;
+      border: 1.5px solid rgba(102, 0, 255, 0.42);
+      background: transparent;
+      box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.55);
     }
 
     .recognition-list a {
@@ -702,10 +1198,10 @@
     .recognition-list a:hover { text-decoration: underline; }
 
     .recognition-list--achievements {
-      margin-top: 0;
+      margin-top: 36px;
       align-self: stretch;
       opacity: 0;
-      transform: translateY(16px);
+      transform: translateY(12px);
     }
 
     .recognition-list--achievements.visible {
@@ -715,7 +1211,7 @@
     /* ── Footer ── */
     footer {
       position: relative;
-      z-index: 10;
+      z-index: 95;
       padding: 40px 48px;
       display: flex;
       justify-content: space-between;
@@ -742,12 +1238,20 @@
     }
 
     @media (max-width: 720px) {
-      nav { padding: 20px 24px; }
-      .creator-inner { grid-template-columns: 1fr; gap: 40px; }
+      nav.site-nav { padding: 20px 24px; }
+      .creator-inner { grid-template-columns: 1fr; gap: 28px; }
+      .snap-screen--maker { padding: 80px 0 20px; }
+      .creator { padding: 12px 20px 8px; }
+      .numbers-section { padding: 16px 20px 4px; }
       footer { flex-direction: column; gap: 12px; text-align: center; }
+      .hero { min-height: 100svh; padding: 96px 20px 40px; }
+      .size-strip { margin-top: 28px; }
+      .size-strip__row { gap: 14px; }
 
       /* Shader preview: square box + tighter padding so mask center matches canvas (no desktop changes above) */
-      .shader-preview { padding: 36px 16px 28px; }
+      .story { padding: 64px 20px 20px; }
+      .shader-preview { padding: 12px 16px 40px; }
+      .shader-stage { height: min(340px, 42vh); }
       #shader-container {
         height: auto;
         aspect-ratio: 1;
@@ -761,15 +1265,77 @@
 
 <canvas id="bg-canvas"></canvas>
 
-<nav>
+<div class="deco-circles" aria-hidden="true">
+  <span class="deco-parallax deco-parallax--a" data-parallax="0.18"><span class="deco-circle"></span></span>
+  <span class="deco-parallax deco-parallax--b" data-parallax="0.1"><span class="deco-circle"></span></span>
+  <span class="deco-parallax deco-parallax--c" data-parallax="0.26"><span class="deco-circle"></span></span>
+  <span class="deco-parallax deco-parallax--d" data-parallax="0.06"><span class="deco-circle"></span></span>
+  <span class="deco-parallax deco-parallax--e" data-parallax="0.14"><span class="deco-circle"></span></span>
+</div>
+
+<nav class="site-nav">
   <a href="/" class="logo">clue.</a>
   <a href="/products" class="shop-btn">products</a>
 </nav>
+<div class="page-vignette" aria-hidden="true"></div>
+
+<div class="section-dots" role="navigation" aria-label="Page sections">
+  <button type="button" class="section-dot is-active" data-target="section-hero" aria-label="About" aria-current="true"></button>
+  <button type="button" class="section-dot" data-target="section-idea" aria-label="The idea"></button>
+  <button type="button" class="section-dot" data-target="section-maker" aria-label="The maker"></button>
+  <button type="button" class="section-dot" data-target="section-faq" aria-label="FAQ"></button>
+</div>
 
 <!-- Hero -->
-<section class="hero">
+<section class="hero" id="section-hero">
   <div class="hero-tag">about clue.</div>
   <h1>light as a <span>living</span><br />canvas</h1>
+
+  <div class="size-strip" id="size-strip" data-series="clue" aria-label="Choose a size">
+    <div class="size-strip__toggle" role="group" aria-label="Series">
+      <button type="button" class="size-strip__series" data-series="clue" aria-pressed="true">clue.</button>
+      <button type="button" class="size-strip__series" data-series="aion" aria-pressed="false">aion.</button>
+    </div>
+
+    <div class="size-strip__row">
+      <a class="size-orb" data-size="18" href="/product/clue-18cm">
+        <span class="size-orb__stage">
+          <span class="size-orb__disc">
+            <img src="https://assets.bigcartel.com/product_images/408377301/mini.png?auto=format&amp;fit=max&amp;w=400" alt="" width="400" height="400" />
+          </span>
+        </span>
+        <span class="size-orb__meta">
+          <span class="size-orb__label">18cm</span>
+          <span class="size-orb__price">150 – 200 €</span>
+        </span>
+      </a>
+
+      <a class="size-orb" data-size="28" href="/product/clue28">
+        <span class="size-orb__stage">
+          <span class="size-orb__disc">
+            <img src="https://assets.bigcartel.com/product_images/408377229/S%CC%81REDNIA.png?auto=format&amp;fit=max&amp;w=400" alt="" width="400" height="400" />
+          </span>
+        </span>
+        <span class="size-orb__meta">
+          <span class="size-orb__label">28cm</span>
+          <span class="size-orb__price">300 – 400 €</span>
+        </span>
+      </a>
+
+      <a class="size-orb" data-size="37" href="/product/clue-38cm">
+        <span class="size-orb__stage">
+          <span class="size-orb__disc">
+            <img src="https://assets.bigcartel.com/product_images/408377337/najwieksza.png?auto=format&amp;fit=max&amp;w=400" alt="" width="400" height="400" />
+          </span>
+        </span>
+        <span class="size-orb__meta">
+          <span class="size-orb__label">37cm</span>
+          <span class="size-orb__price">450 – 600 €</span>
+        </span>
+      </a>
+    </div>
+  </div>
+
   <p class="hero-desc">
     <span class="hero-desc__stanza">clue. is a series of light objects powered by a generative&nbsp;image&nbsp;algorithm.</span>
     <span class="hero-desc__stanza">every frame is computed live — no two moments are ever&nbsp;the&nbsp;same.</span>
@@ -778,7 +1344,8 @@
 
 <div class="divider"></div>
 
-<!-- Story -->
+<!-- Idea + animation (one snap screen) -->
+<div class="snap-screen snap-screen--idea" id="section-idea">
 <section class="story">
   <div class="story-inner">
     <div class="section-label">the idea</div>
@@ -804,7 +1371,9 @@
 
 <!-- Shader Preview -->
 <section class="shader-preview">
-  <div id="shader-container"></div>
+  <div class="shader-stage">
+    <div id="shader-container"></div>
+  </div>
   <p class="art-caption">the actual generative animation</p>
   <div class="speed-control">
     <label for="speed-slider">speed</label>
@@ -812,9 +1381,12 @@
     <span id="speed-label">10×</span>
   </div>
 </section>
+</div>
 
 <div class="divider"></div>
 
+<!-- Maker + numbers (one snap screen) -->
+<div class="snap-screen snap-screen--maker" id="section-maker">
 <!-- Creator -->
 <section class="creator">
   <div class="creator-inner">
@@ -849,42 +1421,42 @@
 
     <div class="achievements" id="achievements">
       <div class="achievement-card">
-        <div class="ach-icon"><svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l4-1.5 8-8-2.5-2.5-8 8L3 17z"/><path d="M12.5 5.5l2.5 2.5"/><line x1="3" y1="17" x2="5" y2="15"/></svg></div>
+        <div class="ach-icon"><svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l4-1.5 8-8-2.5-2.5-8 8L3 17z"/><path d="M12.5 5.5l2.5 2.5"/><line x1="3" y1="17" x2="5" y2="15"/></svg></div>
         <div class="ach-text">
           <strong>design</strong>
           <span>concept, form, and final physical object</span>
         </div>
       </div>
       <div class="achievement-card">
-        <div class="ach-icon"><svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2L18 6L10 10L2 6L10 2z"/><path d="M2 10l8 4 8-4"/><path d="M2 14l8 4 8-4"/></svg></div>
+        <div class="ach-icon"><svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2L18 6L10 10L2 6L10 2z"/><path d="M2 10l8 4 8-4"/><path d="M2 14l8 4 8-4"/></svg></div>
         <div class="ach-text">
           <strong>3d print</strong>
           <span>picked up fabrication from scratch to build the enclosures — no screws, no glue; everything can be replaced, disassembled, and recycled.</span>
         </div>
       </div>
       <div class="achievement-card">
-        <div class="ach-icon"><svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><rect x="5" y="5" width="10" height="10" rx="1.5"/><line x1="5" y1="8" x2="2" y2="8"/><line x1="5" y1="12" x2="2" y2="12"/><line x1="15" y1="8" x2="18" y2="8"/><line x1="15" y1="12" x2="18" y2="12"/><line x1="8" y1="5" x2="8" y2="2"/><line x1="12" y1="5" x2="12" y2="2"/><line x1="8" y1="15" x2="8" y2="18"/><line x1="12" y1="15" x2="12" y2="18"/></svg></div>
+        <div class="ach-icon"><svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><rect x="5" y="5" width="10" height="10" rx="1.5"/><line x1="5" y1="8" x2="2" y2="8"/><line x1="5" y1="12" x2="2" y2="12"/><line x1="15" y1="8" x2="18" y2="8"/><line x1="15" y1="12" x2="18" y2="12"/><line x1="8" y1="5" x2="8" y2="2"/><line x1="12" y1="5" x2="12" y2="2"/><line x1="8" y1="15" x2="8" y2="18"/><line x1="12" y1="15" x2="12" y2="18"/></svg></div>
         <div class="ach-text">
           <strong>electronics</strong>
           <span>custom built PCB smart boards driving the lamp</span>
         </div>
       </div>
       <div class="achievement-card">
-        <div class="ach-icon"><svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="7 4 2 10 7 16"/><polyline points="13 4 18 10 13 16"/></svg></div>
+        <div class="ach-icon"><svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="7 4 2 10 7 16"/><polyline points="13 4 18 10 13 16"/></svg></div>
         <div class="ach-text">
           <strong>code</strong>
           <span>generative animation engine written from the ground up</span>
         </div>
       </div>
       <div class="achievement-card">
-        <div class="ach-icon"><svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><line x1="7" y1="2" x2="13" y2="2"/><path d="M9 2v5L4 14a2 2 0 001.8 3h8.4A2 2 0 0016 14L11 7V2"/></svg></div>
+        <div class="ach-icon"><svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><line x1="7" y1="2" x2="13" y2="2"/><path d="M9 2v5L4 14a2 2 0 001.8 3h8.4A2 2 0 0016 14L11 7V2"/></svg></div>
         <div class="ach-text">
           <strong>testing</strong>
           <span>iterated through 5 hardware and software stacks to find the right fit</span>
         </div>
       </div>
       <div class="achievement-card">
-        <div class="ach-icon"><svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="10" r="3"/><path d="M10 1v2M10 17v2M1 10h2M17 10h2M3.5 3.5l1.4 1.4M15.1 15.1l1.4 1.4M3.5 16.5l1.4-1.4M15.1 4.9l1.4-1.4"/></svg></div>
+        <div class="ach-icon"><svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="10" r="3"/><path d="M10 1v2M10 17v2M1 10h2M17 10h2M3.5 3.5l1.4 1.4M15.1 15.1l1.4 1.4M3.5 16.5l1.4-1.4M15.1 4.9l1.4-1.4"/></svg></div>
         <div class="ach-text">
           <strong>process</strong>
           <span>refined materials and costs until the economics made sense</span>
@@ -894,44 +1466,46 @@
       <div class="recognition-list recognition-list--achievements" aria-label="Clue recognition">
         <div class="section-label">clue recognition</div>
         <ul>
-          <li>Nomination — best debut, TRŁ (<a href="https://www.instagram.com/targirzeczyladnych/" target="_blank" rel="noopener noreferrer">@targirzeczyladnych</a>) · PL</li>
+          <li>Nomination — best debut, TRŁ (<a href="https://www.instagram.com/targirzeczyladnych/" target="_blank" rel="noopener noreferrer">@targirzeczyladnych</a>) · 2025 · PL</li>
           <li>Exhibited — Dobre rzeczy, ŁDF (<a href="https://www.instagram.com/lodzdesign/" target="_blank" rel="noopener noreferrer">@lodzdesign</a>) · November 2025 · PL</li>
-          <li>Exhibited — Paris, „crehange international” · FR</li>
+          <li>Exhibited — Paris, „crehange international” · 2026 · FR</li>
+          <li>Exhibited — Light festival, Gdańsk · 2024 · PL</li>
         </ul>
       </div>
     </div>
   </div>
 </section>
 
-<div class="divider"></div>
 
 <!-- By the numbers -->
 <section class="numbers-section">
   <div class="section-label">by the numbers</div>
+  <div class="stat-row">
+    <div class="stat">
+      <span class="stat-number">100+</span>
+      <span class="stat-label">delivered products</span>
+    </div>
+    <div class="stat">
+      <span class="stat-number">9+</span>
+      <span class="stat-label">countries</span>
+    </div>
+    <div class="stat">
+      <span class="stat-number">3</span>
+      <span class="stat-label">years of development</span>
+    </div>
+    <div class="stat">
+      <span class="stat-number">∞</span>
+      <span class="stat-label">unique frames</span>
+    </div>
+  </div>
 </section>
-<div class="stat-row">
-  <div class="stat">
-    <span class="stat-number">100+</span>
-    <span class="stat-label">delivered products</span>
-  </div>
-  <div class="stat">
-    <span class="stat-number">9+</span>
-    <span class="stat-label">countries</span>
-  </div>
-  <div class="stat">
-    <span class="stat-number">3</span>
-    <span class="stat-label">years of development</span>
-  </div>
-  <div class="stat">
-    <span class="stat-number">∞</span>
-    <span class="stat-label">unique frames</span>
-  </div>
+
 </div>
 
 <div class="divider"></div>
 
 <!-- FAQ -->
-<section class="faq-section" id="faq">
+<section class="faq-section" id="section-faq">
   <div class="faq-inner">
     <h2 class="faq-page-title">frequently asked questions</h2>
 
@@ -941,9 +1515,6 @@
       <div class="faq-item">
         <button type="button" class="faq-q">what comes with the lamp?<span class="faq-icon" aria-hidden="true">+</span></button>
         <div class="faq-a">
-          <figure class="whats-included">
-            <img src="about-whats-included.png" alt="Contents of the clue. lamp box: lamp, cable, hanger, stand, and accessories" width="1600" height="900" loading="lazy" decoding="async" />
-          </figure>
           <ul>
             <li>powering set (USB-C cable and compatible adapter where applicable)</li>
             <li>screw hanger — included in the box for wall mounting</li>
@@ -1104,6 +1675,18 @@
 </footer>
 
 <script>
+// ── Page vignette blur only after scrolling down ─────────────────────────────
+(function () {
+  const vignette = document.querySelector('.page-vignette');
+  if (!vignette) return;
+  const THRESHOLD = 12;
+  function sync() {
+    vignette.classList.toggle('is-scrolled', (window.scrollY || window.pageYOffset || 0) > THRESHOLD);
+  }
+  window.addEventListener('scroll', sync, { passive: true });
+  sync();
+})();
+
 // ── Generative gradient background ──────────────────────────────────────────
 (function () {
   const canvas = document.getElementById('bg-canvas');
@@ -1205,6 +1788,38 @@
   window.addEventListener('resize', scheduleResize);
   applyResize();
   draw();
+})();
+
+// ── Decorative circle parallax ────────────────────────────────────────────────
+// Depth: text scrolls 1:1 (top). Positive factor = lag behind scroll = deeper.
+// Bigger rings → smaller factor; smaller rings → larger factor (deepest).
+(function () {
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const layers = Array.from(document.querySelectorAll('.deco-parallax')).map((el) => ({
+    el,
+    speed: Math.abs(parseFloat(el.dataset.parallax) || 0.1),
+  }));
+  if (!layers.length) return;
+
+  let ticking = false;
+  function update() {
+    ticking = false;
+    const y = window.scrollY || window.pageYOffset || 0;
+    for (let i = 0; i < layers.length; i++) {
+      const { el, speed } = layers[i];
+      // Move down as page scrolls up → rings lag = feel behind content
+      el.style.transform = 'translate3d(0,' + (y * speed).toFixed(1) + 'px,0)';
+    }
+  }
+
+  function onScroll() {
+    if (ticking) return;
+    ticking = true;
+    requestAnimationFrame(update);
+  }
+
+  window.addEventListener('scroll', onScroll, { passive: true });
+  update();
 })();
 
 // ── Shader preview ────────────────────────────────────────────────────────────
@@ -1428,6 +2043,55 @@
   document.querySelectorAll('[data-count]').forEach(c => io.observe(c));
 })();
 
+
+// ── Section dots (scroll spy) ─────────────────────────────────────────────────
+(function () {
+  const dots = Array.from(document.querySelectorAll('.section-dot'));
+  if (!dots.length) return;
+  const sections = dots.map((d) => document.getElementById(d.dataset.target)).filter(Boolean);
+  if (sections.length !== dots.length) return;
+
+  function setActive(id) {
+    dots.forEach((d) => {
+      const on = d.dataset.target === id;
+      d.classList.toggle('is-active', on);
+      if (on) d.setAttribute('aria-current', 'true');
+      else d.removeAttribute('aria-current');
+    });
+  }
+
+  dots.forEach((d) => {
+    d.addEventListener('click', () => {
+      const el = document.getElementById(d.dataset.target);
+      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  });
+
+  let activeId = 'section-hero';
+  const ratios = new Map();
+
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach((e) => {
+      ratios.set(e.target.id, e.intersectionRatio);
+    });
+    let best = activeId;
+    let bestR = -1;
+    sections.forEach((s) => {
+      const r = ratios.get(s.id) || 0;
+      if (r > bestR) {
+        bestR = r;
+        best = s.id;
+      }
+    });
+    if (best !== activeId && bestR > 0) {
+      activeId = best;
+      setActive(activeId);
+    }
+  }, { threshold: [0, 0.25, 0.5, 0.75, 1] });
+
+  sections.forEach((s) => io.observe(s));
+})();
+
 // ── FAQ accordion ─────────────────────────────────────────────────────────────
 (function () {
   document.querySelectorAll('.faq-q').forEach((btn) => {
@@ -1458,6 +2122,195 @@
       }
     });
   });
+})();
+
+// ── Hero size strip (clue. / aion.) ───────────────────────────────────────────
+(function () {
+  const strip = document.getElementById('size-strip');
+  if (!strip) return;
+
+  // Framing: cx/cy = lamp center in the photo (%), zoom = enlarge around that point
+  // so clue ↔ aion stay locked on the same geometric center.
+  const CATALOG = {
+    clue: {
+      18: {
+        href: '/product/clue-18cm',
+        price: '150 – 200 €',
+        img: 'https://assets.bigcartel.com/product_images/408377301/mini.png?auto=format&fit=max&w=400',
+        alt: 'clue. — 18cm',
+        cx: 50, cy: 51, zoom: 2.06,
+      },
+      28: {
+        href: '/product/clue28',
+        price: '300 – 400 €',
+        img: 'https://assets.bigcartel.com/product_images/408377229/S%CC%81REDNIA.png?auto=format&fit=max&w=400',
+        alt: 'clue. — 28cm',
+        cx: 48.7, cy: 49, zoom: 1.9,
+      },
+      37: {
+        href: '/product/clue-38cm',
+        price: '450 – 600 €',
+        img: 'https://assets.bigcartel.com/product_images/408377337/najwieksza.png?auto=format&fit=max&w=400',
+        alt: 'clue. — 37cm',
+        cx: 49.4, cy: 49.9, zoom: 1.53,
+      },
+    },
+    aion: {
+      18: {
+        href: '/product/aion-18cm',
+        price: '175 – 225 €',
+        img: 'https://assets.bigcartel.com/product_images/428062419/_DSC3835_01.png?auto=format&fit=max&w=400',
+        alt: 'aion. — 18cm',
+        cx: 49.6, cy: 48.4, zoom: 2.2,
+      },
+      28: {
+        href: '/product/aion-28cm',
+        price: '330 – 430 €',
+        img: 'https://assets.bigcartel.com/product_images/428064024/_DSC3849_01.jpg?auto=format&fit=max&w=400',
+        alt: 'aion. — 28cm',
+        cx: 48.6, cy: 48.7, zoom: 1.85,
+      },
+      37: {
+        href: '/product/aion-37cm',
+        price: '550 – 620 €',
+        img: 'https://assets.bigcartel.com/product_images/428064198/_DSC3865_01.jpg?auto=format&fit=max&w=400',
+        alt: 'aion. — 37cm',
+        cx: 48.9, cy: 48.7, zoom: 1.39,
+      },
+    },
+  };
+
+  function applyFrame(img, item) {
+    if (!img || !item) return;
+    img.style.setProperty('--img-cx', (item.cx ?? 50) + '%');
+    img.style.setProperty('--img-cy', (item.cy ?? 50) + '%');
+    img.style.setProperty('--img-zoom', String(item.zoom ?? 1.45));
+  }
+
+  function applySeries(series) {
+    const catalog = CATALOG[series];
+    if (!catalog) return;
+    strip.dataset.series = series;
+    strip.querySelectorAll('.size-strip__series').forEach((btn) => {
+      btn.setAttribute('aria-pressed', btn.dataset.series === series ? 'true' : 'false');
+    });
+    strip.querySelectorAll('.size-orb').forEach((orb) => {
+      const size = orb.dataset.size;
+      const item = catalog[size];
+      if (!item) return;
+      orb.href = item.href;
+      const img = orb.querySelector('img');
+      const price = orb.querySelector('.size-orb__price');
+      if (img) {
+        img.src = item.img;
+        img.alt = item.alt;
+        applyFrame(img, item);
+      }
+      if (price) price.textContent = item.price;
+    });
+  }
+
+  applySeries('clue');
+
+  strip.querySelectorAll('.size-strip__series').forEach((btn) => {
+    btn.addEventListener('click', () => applySeries(btn.dataset.series));
+  });
+
+  // Life-size circle: physical cm via CSS `cm` — independent of image crop zoom.
+  // Stays visible while moving across sizes; morphs 18 ↔ 28 ↔ 37 smoothly.
+  // Starts on 28cm; remembers the last hovered size (no snap-back).
+  const life = document.createElement('div');
+  life.className = 'size-orb-life';
+  life.setAttribute('aria-hidden', 'true');
+  document.body.appendChild(life);
+  const sizeRow = strip.querySelector('.size-strip__row');
+  const defaultOrb = strip.querySelector('.size-orb[data-size="28"]');
+  let activeOrb = null;
+
+  // Calibrated from ruler: 13.5→18 then 18.5→18
+  const LIFE_CM_SCALE = 1.22 * (18 / 13.5) * (18 / 18.5); // ≈ 1.583
+  // Offset of preview center from product disc center (physical cm)
+  const LIFE_OFFSET_CM = {
+    18: { x: 4.94, y: -2.64 },
+    28: { x: 4.20, y: 0.00 },
+    37: { x: -12.06, y: 8.53 },
+  };
+
+  function pinchScale() {
+    return (window.visualViewport && window.visualViewport.scale) || 1;
+  }
+
+  function placeLife(orb, { morph } = {}) {
+    const disc = orb.querySelector('.size-orb__disc');
+    if (!disc) return;
+    const cm = Number(orb.dataset.size);
+    if (!cm) return;
+    const wasVisible = life.classList.contains('is-visible');
+    const switchingSize = wasVisible && activeOrb && activeOrb !== orb;
+    const shouldMorph = morph !== undefined ? morph : switchingSize;
+
+    if (!shouldMorph && activeOrb === orb && wasVisible && morph === undefined) {
+      return;
+    }
+
+    if (shouldMorph) {
+      life.classList.add('is-morphing');
+      void life.offsetWidth;
+    } else {
+      life.classList.remove('is-morphing');
+    }
+
+    const rect = disc.getBoundingClientRect();
+    const scale = LIFE_CM_SCALE / pinchScale();
+    const o = LIFE_OFFSET_CM[cm] || { x: 0, y: 0 };
+    life.style.width = cm + 'cm';
+    life.style.height = cm + 'cm';
+    life.style.left = 'calc(' + (rect.left + rect.width / 2) + 'px + ' + o.x + 'cm)';
+    life.style.top = 'calc(' + (rect.top + rect.height / 2) + 'px + ' + o.y + 'cm)';
+    life.style.transform = 'translate(-50%, -50%) scale(' + scale + ')';
+    life.classList.add('is-visible');
+    activeOrb = orb;
+  }
+
+  function showDefaultLife() {
+    if (defaultOrb) placeLife(defaultOrb, { morph: false });
+  }
+
+  function refreshLife() {
+    if (activeOrb) placeLife(activeOrb, { morph: false });
+    else showDefaultLife();
+  }
+
+  const fineHover =
+    typeof window.matchMedia === 'function' &&
+    window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+
+  if (fineHover && sizeRow) {
+    sizeRow.addEventListener('pointerover', (e) => {
+      const orb = e.target.closest('.size-orb');
+      if (orb && sizeRow.contains(orb)) placeLife(orb);
+    });
+  } else {
+    strip.querySelectorAll('.size-orb').forEach((orb) => {
+      orb.addEventListener('click', (e) => {
+        if (activeOrb === orb && life.classList.contains('is-visible')) {
+          return;
+        }
+        e.preventDefault();
+        placeLife(orb);
+      });
+    });
+  }
+
+  requestAnimationFrame(() => requestAnimationFrame(showDefaultLife));
+
+  window.addEventListener('scroll', refreshLife, { passive: true });
+  window.addEventListener('resize', refreshLife);
+  if (window.visualViewport) {
+    window.visualViewport.addEventListener('resize', refreshLife);
+    window.visualViewport.addEventListener('scroll', refreshLife);
+  }
+
 })();
 
 </script>
