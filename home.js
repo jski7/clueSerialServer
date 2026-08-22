@@ -13,25 +13,83 @@ let isRP2350Driver = false; // Track if rp2350 driver is detected
 let readCommandInterval = null; // Track read command interval
 let configReceived = false; // Track if config has been received
 let colorOrderSelect; // Color order selection dropdown
+let serialConnecting = false;
+
+// USB filters for clue devices (Pico / ESP / common USB-UART bridges)
+const SERIAL_PORT_FILTERS = [
+  { usbVendorId: 0x2e8a }, // Raspberry Pi (Pico / RP2040 / RP2350 CDC)
+  { usbVendorId: 0x303a }, // Espressif
+  { usbVendorId: 0x10c4 }, // Silicon Labs CP210x (many ESP boards)
+  { usbVendorId: 0x1a86 }, // WCH CH340
+  { usbVendorId: 0x0403 }, // FTDI
+];
+
+function getPortUsbVendorId(serialPort) {
+  try {
+    const info = serialPort.getInfo ? serialPort.getInfo() : {};
+    return info.usbVendorId;
+  } catch (_) {
+    return undefined;
+  }
+}
+
+function isPicoSerialPort(serialPort) {
+  return getPortUsbVendorId(serialPort) === 0x2e8a;
+}
+
+function isKnownClueSerialPort(serialPort) {
+  const vid = getPortUsbVendorId(serialPort);
+  if (vid == null) return true; // some environments omit info — still try
+  return SERIAL_PORT_FILTERS.some((f) => f.usbVendorId === vid);
+}
+
+/** Prefer Pico, then other known clue boards, then first available. */
+function pickAutoConnectPort(ports) {
+  if (!ports || !ports.length) return null;
+  const pico = ports.find(isPicoSerialPort);
+  if (pico) return pico;
+  const known = ports.find(isKnownClueSerialPort);
+  if (known) return known;
+  return ports[0];
+}
+
+function startSerialAutoConnectPolling() {
+  if (!('serial' in navigator) || serialAutoConnectInterval) return;
+
+  function tryAutoConnect() {
+    if (serialConnected || serialConnecting) return;
+    navigator.serial.getPorts().then((ports) => {
+      const chosen = pickAutoConnectPort(ports);
+      if (chosen) autoConnectToSerialPort(chosen);
+    }).catch((err) => {
+      console.warn('Serial port poll failed:', err);
+    });
+  }
+
+  tryAutoConnect();
+  serialAutoConnectInterval = setInterval(tryAutoConnect, 1000);
+
+  // Hot-plug: previously authorized Pico/ESP reconnects without picking again
+  if (!navigator.serial._clueConnectListenerAttached) {
+    navigator.serial.addEventListener('connect', (event) => {
+      if (serialConnected || serialConnecting) return;
+      const port = event.target;
+      if (port && (isPicoSerialPort(port) || isKnownClueSerialPort(port))) {
+        autoConnectToSerialPort(port);
+      } else {
+        tryAutoConnect();
+      }
+    });
+    navigator.serial._clueConnectListenerAttached = true;
+  }
+}
 
 function setup() {
   // Initialize animation with default settings
   initAnimation(0.3, 60);
 
-  // Auto-connect to serial if possible, and set up periodic check
-  if ('serial' in navigator) {
-    function tryAutoConnect() {
-      if (!serialConnected) {
-        navigator.serial.getPorts().then(ports => {
-          if (ports.length > 0) {
-            autoConnectToSerialPort(ports[0]);
-          }
-        });
-      }
-    }
-    tryAutoConnect(); // Initial check
-    serialAutoConnectInterval = setInterval(tryAutoConnect, 1000); // Check every 2 seconds
-  }
+  // Auto-connect to previously authorized Pico/ESP serial ports
+  startSerialAutoConnectPolling();
 
   // Create a div to hold everything and center it
   let container = createDiv();
@@ -52,11 +110,11 @@ function setup() {
   let buttonContainer = createDiv().parent(container).style('display', 'flex').style('justify-content', 'center').style('gap', '10px').style('margin-bottom', '0px');
   window.buttonContainer = buttonContainer; // Store reference globally for access
   
-  // Connect to device button
+  // Connect to device button — step 1: instruction modal, step 2: browser serial picker
   let button = createButton("Select Device").parent(buttonContainer);
   button.class('button-36');
   button.id('connect-device-btn');
-  button.mousePressed(connectToSerialPort);
+  button.mousePressed(openConnectFlow);
   window.connectDeviceButton = button; // Store reference globally for access in connectToSerialPort
   
   // Add separator after connected button
@@ -422,13 +480,23 @@ function sendSerial(prefix, value) {
   }
 }
 
+function openConnectFlow() {
+  if (serialConnected || serialConnecting) return;
+  if (typeof openSerialConnectModal === 'function') {
+    openSerialConnectModal(connectToSerialPort);
+  } else {
+    connectToSerialPort();
+  }
+}
+
 async function connectToSerialPort() {
   try {
-    port = await navigator.serial.requestPort();
+    port = await navigator.serial.requestPort({ filters: SERIAL_PORT_FILTERS });
     await port.open({ baudRate: 115200 });
     writer = port.writable.getWriter();
     reader = port.readable.getReader();
     serialConnected = true;
+    serialConnecting = false;
     if (serialAutoConnectInterval) {
       clearInterval(serialAutoConnectInterval);
       serialAutoConnectInterval = null;
@@ -464,6 +532,7 @@ async function connectToSerialPort() {
     console.error("Error connecting to serial port: ", error);
     // On error, update UI to disconnected state
     serialConnected = false;
+    serialConnecting = false;
     if (window.connectDeviceButton) {
       window.connectDeviceButton.html('Select Device');
       window.connectDeviceButton.removeClass('button-connected');
@@ -499,26 +568,18 @@ async function connectToSerialPort() {
       window.buttonContainer.style('margin-bottom', '0px');
     }
     // Restart periodic auto-connect
-    if (!serialConnected && !serialAutoConnectInterval && 'serial' in navigator) {
-      function tryAutoConnect() {
-        if (!serialConnected) {
-          navigator.serial.getPorts().then(ports => {
-            if (ports.length > 0) {
-              autoConnectToSerialPort(ports[0]);
-            }
-          });
-        }
-      }
-      serialAutoConnectInterval = setInterval(tryAutoConnect, 1000);
-    }
+    startSerialAutoConnectPolling();
   }
 }
 
-async function autoConnectToSerialPort(port) {
+async function autoConnectToSerialPort(serialPort) {
+  if (serialConnected || serialConnecting) return;
+  serialConnecting = true;
   try {
-    await port.open({ baudRate: 115200 });
-    writer = port.writable.getWriter();
-    reader = port.readable.getReader();
+    await serialPort.open({ baudRate: 115200 });
+    writer = serialPort.writable.getWriter();
+    reader = serialPort.readable.getReader();
+    port = serialPort;
     serialConnected = true;
     if (serialAutoConnectInterval) {
       clearInterval(serialAutoConnectInterval);
@@ -551,9 +612,12 @@ async function autoConnectToSerialPort(port) {
     // Start sending read commands every second until config is received
     startReadCommandLoop();
     
-    console.log('Auto-connected to serial port!');
+    const vid = getPortUsbVendorId(serialPort);
+    console.log('Auto-connected to serial port!', vid != null ? `(VID 0x${vid.toString(16)})` : '');
   } catch (err) {
     console.error('Auto-connect failed:', err);
+  } finally {
+    serialConnecting = false;
   }
 }
 
@@ -630,18 +694,7 @@ async function readSerialLoop() {
       window.buttonContainer.style('margin-bottom', '0px');
     }
     // Restart periodic auto-connect
-    if (!serialConnected && !serialAutoConnectInterval && 'serial' in navigator) {
-      function tryAutoConnect() {
-        if (!serialConnected) {
-          navigator.serial.getPorts().then(ports => {
-            if (ports.length > 0) {
-              autoConnectToSerialPort(ports[0]);
-            }
-          });
-        }
-      }
-      serialAutoConnectInterval = setInterval(tryAutoConnect, 1000);
-    }
+    startSerialAutoConnectPolling();
   }
 }
 
